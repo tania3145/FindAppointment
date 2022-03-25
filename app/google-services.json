@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "515088325280",
+    "project_id": "findappointment",
+    "storage_bucket": "findappointment.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515088325280:android:65c83c1452df4b84bc87c5",
+        "android_client_info": {
+          "package_name": "com.example.findappointment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "515088325280-t64ouaj9uri00s3fdsuuf3les067d50c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKpm66mzQvS8fmBbrXCHoOLNbQyV9zcFo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "515088325280-t64ouaj9uri00s3fdsuuf3les067d50c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
