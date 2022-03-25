@@ -12,6 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FindAppointment">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAbSiOrYILqgT8dJ8Nk8KTp_IHOWZ7HI9Y" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
