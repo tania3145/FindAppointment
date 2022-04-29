@@ -20,6 +20,16 @@
         android:layout_height="match_parent"
         tools:context="com.example.mapwithmarker.MapsMarkerActivity" />
 
+<!--    <FrameLayout-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/standard_bottom_sheet"-->
+<!--        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">-->
+
+<!--    &lt;!&ndash; Bottom sheet contents. &ndash;&gt;-->
+
+<!--    </FrameLayout>-->
+
 <!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
 <!--        android:id="@+id/centerLocationFab"-->
 <!--        android:layout_width="wrap_content"-->

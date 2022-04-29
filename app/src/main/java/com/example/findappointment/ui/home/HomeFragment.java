@@ -19,14 +19,24 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.findappointment.MainActivity;
 import com.example.findappointment.R;
+import com.example.findappointment.Services;
+import com.example.findappointment.data.Business;
 import com.example.findappointment.databinding.FragmentHomeBinding;
+import com.example.findappointment.services.Utility;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 
@@ -34,14 +44,20 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private FragmentHomeBinding binding;
     private GoogleMap map;
+    HomeViewModel viewModel;
+
+    private HomeViewModel createViewModel() {
+        Services services = ((MainActivity) getActivity()).getServices();
+        HomeViewModel.Factory factory = new HomeViewModel.Factory(services);
+        return new ViewModelProvider(this, factory).get(HomeViewModel.class);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        // Set location permissions.
-        setPermissions();
+        viewModel = createViewModel();
 
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+        // Set location permissions.
+        viewModel.getServices().getPermissions().requireLocation(getActivity());
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -53,15 +69,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
         return root;
-    }
-
-    private void setPermissions() {
-        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
-        }
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
     }
 
     private Location getLastKnownLocation() {
@@ -83,6 +90,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private void centerUserLocation() {
         Location currentLocation = getLastKnownLocation();
+        if (currentLocation == null) {
+            viewModel.getServices().getUtility().showDialog(getActivity(), Utility.DialogType.WARNING, "Could not retrieve user location.");
+            return;
+        }
         LatLng currentLocationLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocationLatLng, 13.5f));
     }
@@ -91,6 +102,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
+
+        viewModel.getBusinesses().observe(getViewLifecycleOwner(), businesses -> {
+            this.map.clear();
+            for (Business business : businesses) {
+                this.map.addMarker(new MarkerOptions()
+                        .position(business.getLocation())
+                        .title(business.getName()));
+            }
+        });
         map.setMyLocationEnabled(true);
         try {
             if (!this.map.setMapStyle(
