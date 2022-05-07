@@ -1,8 +1,11 @@
 package com.example.findappointment;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.example.findappointment.databinding.ActivityRegisterBinding;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -11,8 +14,14 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        ActivityRegisterBinding binding = ActivityRegisterBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         services = ((MainApplication) getApplication()).getServices();
+    }
+
+    @NonNull
+    public Services getServices() {
+        return services;
     }
 }

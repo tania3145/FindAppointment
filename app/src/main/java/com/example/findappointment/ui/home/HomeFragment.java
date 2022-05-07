@@ -69,6 +69,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
                 .get(HomeViewModel.class);
     }
 
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         viewModel = createViewModel();
@@ -88,6 +89,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         return root;
     }
 
+    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         View bottomSheet = view.findViewById(R.id.bottom_sheet);
         sheet = BottomSheetBehavior.from(bottomSheet);

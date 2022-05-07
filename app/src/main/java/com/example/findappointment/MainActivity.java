@@ -26,11 +26,13 @@ public class MainActivity extends AppCompatActivity {
     private void setupNotLogged() {
         navigationView.getMenu().clear();
         getMenuInflater().inflate(R.menu.logout_menu, navigationView.getMenu());
-        System.out.println("not logged");
+        navigationView.getMenu().getItem(0).setChecked(true);
     }
 
     private void setupLogged() {
-        System.out.println("Logged");
+        navigationView.getMenu().clear();
+        getMenuInflater().inflate(R.menu.login_user_menu, navigationView.getMenu());
+        navigationView.getMenu().getItem(0).setChecked(true);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_login)
+                R.id.nav_home, R.id.nav_login, R.id.nav_register)
                 .setOpenableLayout(drawer)
                 .build();
 
