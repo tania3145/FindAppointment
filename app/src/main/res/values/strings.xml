@@ -2,7 +2,7 @@
     <string name="app_name">FindAppointment</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_title">Guest User</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
@@ -16,4 +16,8 @@
 
     <!-- Custom strings -->
     <string name="app_tag">FindAppointment</string>
+    <string name="menu_appointments">Appointments</string>
+    <string name="menu_logout">Logout</string>
+    <string name="menu_help_feedback"><![CDATA[Help & Feedback]]></string>
+    <string name="menu_account">Account</string>
 </resources>
