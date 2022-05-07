@@ -89,6 +89,10 @@ public class Database {
         auth.signInWithEmailAndPassword(email, password);
     }
 
+    public void logout() {
+        auth.signOut();
+    }
+
     public void getBusinesses(Function<List<Business>, Void> successCallback,
                               Function<Error, Void> failureCallback) {
         db.collection("businesses").get()

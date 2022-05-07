@@ -90,6 +90,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         View bottomSheet = view.findViewById(R.id.bottom_sheet);
         sheet = BottomSheetBehavior.from(bottomSheet);

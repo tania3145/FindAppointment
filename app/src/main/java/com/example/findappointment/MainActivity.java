@@ -2,6 +2,7 @@ package com.example.findappointment;
 
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.example.findappointment.databinding.ActivityMainBinding;
@@ -33,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
         navigationView.getMenu().clear();
         getMenuInflater().inflate(R.menu.login_user_menu, navigationView.getMenu());
         navigationView.getMenu().getItem(0).setChecked(true);
+        navigationView.getMenu().getItem(4).setOnMenuItemClickListener(menuItem -> {
+            services.getDatabase().logout();
+            return true;
+        });
     }
 
     @Override
@@ -74,13 +79,6 @@ public class MainActivity extends AppCompatActivity {
                 setupNotLogged();
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
     }
 
     @Override

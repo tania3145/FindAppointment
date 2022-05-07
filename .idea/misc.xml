@@ -28,6 +28,7 @@
         <entry key="app/src/main/res/layout/nav_header_main.xml" value="0.5911458333333334" />
         <entry key="app/src/main/res/menu/activity_main_drawer.xml" value="0.5911458333333334" />
         <entry key="app/src/main/res/menu/login_menu.xml" value="0.30512820512820515" />
+        <entry key="app/src/main/res/menu/login_user_menu.xml" value="0.30512820512820515" />
         <entry key="app/src/main/res/menu/logout_menu.xml" value="0.30512820512820515" />
         <entry key="app/src/main/res/menu/main.xml" value="0.5911458333333334" />
       </map>
