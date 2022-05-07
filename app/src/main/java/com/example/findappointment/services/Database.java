@@ -1,10 +1,7 @@
 package com.example.findappointment.services;
 
-import android.util.Log;
-
-import com.example.findappointment.R;
 import com.example.findappointment.data.Business;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -15,9 +12,23 @@ import java.util.function.Function;
 public class Database {
 
     private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
     public Database() {
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+    }
+
+    public boolean isLoginEmailValid(String email) {
+        return !email.isEmpty() && email.contains("@");
+    }
+
+    public boolean isUserLoggedIn() {
+        return auth.getCurrentUser() != null;
+    }
+
+    public void onAuthChanged(FirebaseAuth.AuthStateListener listener) {
+        auth.addAuthStateListener(listener);
     }
 
     public void getBusinesses(Function<List<Business>, Void> successCallback, Function<Error, Void> failureCallback) {

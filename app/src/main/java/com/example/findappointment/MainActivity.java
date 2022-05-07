@@ -1,19 +1,13 @@
 package com.example.findappointment;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
 import android.view.Menu;
+import android.view.View;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.example.findappointment.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -21,13 +15,23 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.findappointment.databinding.ActivityMainBinding;
-
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration mAppBarConfiguration;
+    private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
     private Services services;
+    private NavigationView navigationView;
+    private NavController navController;
+
+    private void setupNotLogged() {
+        navigationView.getMenu().clear();
+        getMenuInflater().inflate(R.menu.logout_menu, navigationView.getMenu());
+        System.out.println("not logged");
+    }
+
+    private void setupLogged() {
+        System.out.println("Logged");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,16 +50,28 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
         DrawerLayout drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
+        navigationView = binding.navView;
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+        appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_home, R.id.nav_login)
                 .setOpenableLayout(drawer)
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+
+        navController = Navigation
+                .findNavController(this, R.id.nav_host_fragment_content_main);
+        NavigationUI
+                .setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        services.getDatabase().onAuthChanged(firebaseAuth -> {
+            if (services.getDatabase().isUserLoggedIn()) {
+                setupLogged();
+            } else {
+                setupNotLogged();
+            }
+        });
     }
 
     @Override
@@ -67,13 +83,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+        NavController navController = Navigation
+                .findNavController(this, R.id.nav_host_fragment_content_main);
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
     }
 
     @NonNull
     public Services getServices() {
         return services;
+    }
+
+    @NonNull
+    public NavController getNavController() {
+        return navController;
     }
 }

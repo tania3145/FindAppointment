@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -91,6 +92,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         View bottomSheet = view.findViewById(R.id.bottom_sheet);
         sheet = BottomSheetBehavior.from(bottomSheet);
         sheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        Button makeAppointment = view.findViewById(R.id.make_appointment_button);
+        makeAppointment.setOnClickListener(elView -> {
+            if (!viewModel.getServices().getDatabase().isUserLoggedIn()) {
+                viewModel.getServices().getUtility().showToast(requireActivity(), "Please login");
+                ((MainActivity) requireActivity()).getNavController().navigate(R.id.nav_login);
+                return;
+            }
+            System.out.println("Make appointment");
+        });
     }
 
     private Location getLastKnownLocation() {

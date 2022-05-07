@@ -102,6 +102,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
         <Button
+            android:id="@+id/make_appointment_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
