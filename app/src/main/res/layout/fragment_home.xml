@@ -13,31 +13,32 @@
         android:layout_height="match_parent"
         tools:context="com.example.mapwithmarker.MapsMarkerActivity" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#fff"
         android:orientation="vertical"
         android:padding="10dp"
+        android:clickable="true"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="56dp"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        app:behavior_peekHeight="60dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        android:focusable="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="center_vertical"
-            android:weightSum="3">
+            android:weightSum="2">
 
             <TextView
+                android:id="@+id/bottom_sheet_business_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:layout_weight="2"
-                android:text="Location Details"
+                android:layout_weight="1"
                 android:textColor="#444"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -49,7 +50,7 @@
                 android:layout_weight="1"
                 android:textStyle="bold"
                 android:textSize="15sp"
-                android:text="NUMELE LOCATIEI" />
+                android:text="ADDRESSA ESTE EXTREM DE LUNGA CE FACEM" />
         </LinearLayout>
 
         <TextView
