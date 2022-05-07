@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -34,6 +35,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -44,7 +46,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private FragmentHomeBinding binding;
     private GoogleMap map;
-    HomeViewModel viewModel;
+    private BottomSheetBehavior bottomSheetBehavior;
+    private HomeViewModel viewModel;
 
     private HomeViewModel createViewModel() {
         Services services = ((MainActivity) getActivity()).getServices();
@@ -56,12 +59,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                              ViewGroup container, Bundle savedInstanceState) {
         viewModel = createViewModel();
 
-        // Set location permissions.
-        viewModel.getServices().getPermissions().requireLocation(getActivity());
-
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        // binding.centerLocationFab.setOnClickListener(view -> centerUserLocation());
+
+        // Set location permissions.
+        viewModel.getServices().getPermissions().requireLocation(getActivity());
 
         // Initialise map.
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
@@ -69,6 +71,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
         return root;
+    }
+
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        View bottomSheet = view.findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     private Location getLastKnownLocation() {
