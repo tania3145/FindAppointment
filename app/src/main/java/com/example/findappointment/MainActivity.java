@@ -1,5 +1,7 @@
 package com.example.findappointment;
 
+import static com.amulyakhare.textdrawable.util.ColorGenerator.MATERIAL;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -7,8 +9,13 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.example.findappointment.data.User;
 import com.example.findappointment.databinding.ActivityMainBinding;
+import com.example.findappointment.services.Utility;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -23,6 +30,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int HEADER_IMAGE_SIZE = 150;
 
     private AppBarConfiguration appBarConfiguration;
     private Services services;
@@ -50,6 +59,35 @@ public class MainActivity extends AppCompatActivity {
             drawer.closeDrawer(GravityCompat.START);
             services.getUtility().showToast(this, "Successfully logged out");
             return false;
+        });
+        services.getDatabase().getSignedInUser().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                User user = task.getResult();
+
+                // Set name
+                TextView accountName = findViewById(R.id.header_account_name);
+                accountName.setText(String.format("%s %s",
+                        user.getFirstName(), user.getLastName()));
+                if (user.getFirstName().isEmpty() || user.getLastName().isEmpty()) {
+                    return;
+                }
+
+                String initials = "" + user.getFirstName().toUpperCase().charAt(0) +
+                        user.getLastName().toUpperCase().charAt(0);
+
+                // Set default image
+                TextDrawable drawable = TextDrawable.builder()
+                        .beginConfig()
+                        .width(HEADER_IMAGE_SIZE)
+                        .height(HEADER_IMAGE_SIZE)
+                        .endConfig()
+                        .buildRound(initials, MATERIAL.getColor(initials));
+                ImageView imageFrame = findViewById(R.id.header_account_image);
+                imageFrame.setImageDrawable(drawable);
+            } else {
+                services.getUtility().showDialog(this, Utility.DialogType.ERROR,
+                        task.getException().getMessage());
+            }
         });
     }
 

@@ -13,7 +13,7 @@ import com.example.findappointment.R;
 public class Utility {
 
     public enum DialogType {
-        INFO, WARNING
+        INFO, WARNING, ERROR
     }
 
     private Application application;
@@ -24,10 +24,11 @@ public class Utility {
 
     private void showInfoDialog(Activity activity, DialogType type, String message) {
         AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
-        if (type == DialogType.INFO) {
-            alertDialog.setTitle("Info");
-        } else if (type == DialogType.WARNING) {
-            alertDialog.setTitle("Warning");
+        switch (type) {
+            case INFO: alertDialog.setTitle("Info"); break;
+            case WARNING: alertDialog.setTitle("Warning"); break;
+            case ERROR: alertDialog.setTitle("Error"); break;
+            default: break;
         }
         alertDialog.setMessage(message);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok",

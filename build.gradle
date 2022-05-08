@@ -2,6 +2,9 @@ buildscript {
     repositories {
         // Check that you have the following line (if not, add it):
         google()  // Google's Maven repository
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://dl.bintray.com/amulyakhare/maven' }
     }
     dependencies {
         // Add this line
@@ -17,6 +20,9 @@ allprojects {
     repositories {
         // Check that you have the following line (if not, add it):
         google()  // Google's Maven repository
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://dl.bintray.com/amulyakhare/maven' }
     }
 }
 task clean(type: Delete) {

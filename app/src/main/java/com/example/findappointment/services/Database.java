@@ -1,21 +1,18 @@
 package com.example.findappointment.services;
 
-import androidx.annotation.NonNull;
-
 import com.example.findappointment.data.Business;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.example.findappointment.data.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
 
 public class Database {
     public class Validator {
@@ -58,13 +55,44 @@ public class Database {
         return auth.getCurrentUser() != null;
     }
 
-    public FirebaseUser getSignedInUser() {
-        return auth.getCurrentUser();
+    // TODO: Implement user
+    public Task<User> getSignedInUser() {
+        TaskCompletionSource<User> taskSource = new TaskCompletionSource<>();
+        if (auth.getCurrentUser() == null) {
+            taskSource.setException(new Exception("User is not logged in."));
+            return taskSource.getTask();
+        }
+        db.collection("users")
+                .document(auth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot snapshot = task.getResult();
+                        if (!snapshot.exists()) {
+                            taskSource.setException(new Exception("Could not find user details."));
+                            return;
+                        }
+                        User user = new User(auth.getCurrentUser().getUid());
+                        if (snapshot.contains("first_name")) {
+                            user.setFirstName(snapshot.getString("first_name"));
+                        }
+                        if (snapshot.contains("last_name")) {
+                            user.setLastName(snapshot.getString("last_name"));
+                        }
+                        if (snapshot.contains("email")) {
+                            user.setEmail(snapshot.getString("email"));
+                        }
+                        taskSource.setResult(user);
+                    } else {
+                        taskSource.setException(task.getException());
+                    }
+                });
+        return taskSource.getTask();
     }
 
-    public Task<AuthResult> registerUser(String firstName, String lastName, String email,
+    public Task<User> registerUser(String firstName, String lastName, String email,
                              String password, String confirmPassword) {
-        TaskCompletionSource<AuthResult> taskSource = new TaskCompletionSource<>();
+        TaskCompletionSource<User> taskSource = new TaskCompletionSource<>();
         if (!validator.isNameValid(firstName) || !validator.isNameValid(lastName) ||
                 !validator.isLoginEmailValid(email) || !validator.isPasswordValid(password) ||
                 !validator.isConfirmPasswordValid(password, confirmPassword)) {
@@ -75,8 +103,29 @@ public class Database {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    auth.signInWithEmailAndPassword(email, password);
-                    taskSource.setResult(task.getResult());
+                    User user = new User(task.getResult().getUser().getUid(),
+                            firstName, lastName, email);
+
+                    db.collection("users")
+                            .document(user.getId())
+                            .set(new HashMap<String, Object>() {{
+                                put("first_name", user.getFirstName());
+                                put("last_name", user.getLastName());
+                                put("email", user.getEmail());
+                            }}).addOnCompleteListener(storeTask -> {
+                        if (storeTask.isSuccessful()) {
+                            auth.signInWithEmailAndPassword(email, password)
+                                    .addOnCompleteListener(signInTask -> {
+                                        if (signInTask.isSuccessful()) {
+                                            taskSource.setResult(user);
+                                        } else {
+                                            taskSource.setException(signInTask.getException());
+                                        }
+                                    });
+                        } else {
+                            taskSource.setException(storeTask.getException());
+                        }
+                    });
                 } else {
                     taskSource.setException(task.getException());
                 }
@@ -99,18 +148,19 @@ public class Database {
 
     public Task<List<Business>> getBusinesses() {
         TaskCompletionSource<List<Business>> taskSource = new TaskCompletionSource<>();
-        db.collection("businesses").get()
-            .addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    List<Business> businesses = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        businesses.add(Business.fromSnapshot(document));
+        db.collection("businesses")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Business> businesses = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            businesses.add(Business.fromSnapshot(document));
+                        }
+                        taskSource.setResult(businesses);
+                    } else {
+                        taskSource.setException(task.getException());
                     }
-                    taskSource.setResult(businesses);
-                } else {
-                    taskSource.setException(task.getException());
-                }
-            });
+                });
         return taskSource.getTask();
     }
 }
