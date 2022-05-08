@@ -10,5 +10,5 @@
         android:id="@+id/register_content_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.example.findappointment.ui.register.RegisterIntroFragment"/>
+        android:name="com.example.findappointment.ui.register.RegisterUserFragment"/>
 </FrameLayout>

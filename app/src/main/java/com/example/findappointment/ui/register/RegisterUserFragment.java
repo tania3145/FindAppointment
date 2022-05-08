@@ -19,7 +19,7 @@ import com.example.findappointment.RegisterActivity;
 import com.example.findappointment.Services;
 import com.example.findappointment.services.Utility;
 
-public class RegisterUserDetailsFragment extends Fragment {
+public class RegisterUserFragment extends Fragment {
 
     private EditText firstNameField;
     private EditText lastNameField;
@@ -32,7 +32,7 @@ public class RegisterUserDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         services = ((RegisterActivity) requireActivity()).getServices();
-        return inflater.inflate(R.layout.fragment_register_user_details, container, false);
+        return inflater.inflate(R.layout.fragment_register_user, container, false);
     }
 
     private void verifyFirstName() {

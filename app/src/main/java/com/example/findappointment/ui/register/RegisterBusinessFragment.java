@@ -13,11 +13,11 @@ import android.widget.Button;
 
 import com.example.findappointment.R;
 
-public class RegisterIntroFragment extends Fragment {
+public class RegisterBusinessFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_register_intro, container, false);
+        return inflater.inflate(R.layout.fragment_register_business, container, false);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class RegisterIntroFragment extends Fragment {
         userButton.setOnClickListener(elView -> {
             requireActivity().getSupportFragmentManager().beginTransaction()
                     .setReorderingAllowed(true)
-                    .replace(R.id.register_content_view, RegisterUserDetailsFragment.class, null)
+                    .replace(R.id.register_content_view, RegisterUserFragment.class, null)
                     .addToBackStack(null)
                     .commit();
         });

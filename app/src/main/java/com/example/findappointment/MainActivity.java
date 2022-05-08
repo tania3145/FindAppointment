@@ -48,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
             launchRegisterActivity();
             return false;
         });
+        TextView accountName = findViewById(R.id.header_account_name);
+        accountName.setText(R.string.nav_header_title);
+        ImageView imageFrame = findViewById(R.id.header_account_image);
+        imageFrame.setImageResource(R.mipmap.ic_guest);
     }
 
     private void setupLogged() {
