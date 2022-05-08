@@ -5,16 +5,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-import com.example.findappointment.databinding.ActivityRegisterBinding;
+import com.example.findappointment.databinding.ActivityRegisterBusinessBinding;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterBusinessActivity extends AppCompatActivity {
 
     private Services services;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityRegisterBinding binding = ActivityRegisterBinding.inflate(getLayoutInflater());
+        ActivityRegisterBusinessBinding binding =
+                ActivityRegisterBusinessBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         services = ((MainApplication) getApplication()).getServices();

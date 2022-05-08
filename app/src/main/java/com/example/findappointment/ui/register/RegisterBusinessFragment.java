@@ -1,5 +1,6 @@
 package com.example.findappointment.ui.register;
 
+import android.app.Activity;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,13 +25,15 @@ public class RegisterBusinessFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Button userButton = view.findViewById(R.id.user_button);
-        userButton.setOnClickListener(elView -> {
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .setReorderingAllowed(true)
-                    .replace(R.id.register_content_view, RegisterUserFragment.class, null)
-                    .addToBackStack(null)
-                    .commit();
+        Button noButton = view.findViewById(R.id.no_button);
+        noButton.setOnClickListener(elView -> {
+            requireActivity().setResult(Activity.RESULT_OK);
+            requireActivity().finish();
+        });
+        Button yesButton = view.findViewById(R.id.yes_button);
+        yesButton.setOnClickListener(elView -> {
+            requireActivity().setResult(Activity.RESULT_OK);
+            requireActivity().finish();
         });
     }
 }

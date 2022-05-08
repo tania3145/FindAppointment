@@ -17,4 +17,22 @@
         android:label="@string/menu_login"
         tools:layout="@layout/fragment_login" />
 
+    <fragment
+        android:id="@+id/nav_appointments"
+        android:name="com.example.findappointment.ui.appointments.AppointmentsFragment"
+        android:label="@string/menu_appointments"
+        tools:layout="@layout/fragment_appointments" />
+
+    <fragment
+        android:id="@+id/nav_account"
+        android:name="com.example.findappointment.ui.account.AccountFragment"
+        android:label="@string/menu_account"
+        tools:layout="@layout/fragment_account" />
+
+    <fragment
+        android:id="@+id/nav_feedback"
+        android:name="com.example.findappointment.ui.feedback.FeedbackFragment"
+        android:label="@string/menu_help_feedback"
+        tools:layout="@layout/fragment_feedback" />
+
 </navigation>

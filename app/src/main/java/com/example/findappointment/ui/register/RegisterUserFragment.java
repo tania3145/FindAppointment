@@ -2,8 +2,11 @@ package com.example.findappointment.ui.register;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -15,7 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.findappointment.R;
-import com.example.findappointment.RegisterActivity;
+import com.example.findappointment.RegisterBusinessActivity;
+import com.example.findappointment.RegisterUserActivity;
 import com.example.findappointment.Services;
 import com.example.findappointment.services.Utility;
 
@@ -27,11 +31,12 @@ public class RegisterUserFragment extends Fragment {
     private EditText passwordField;
     private EditText confirmPasswordField;
     private Services services;
+    private ActivityResultLauncher<Intent> launcher;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        services = ((RegisterActivity) requireActivity()).getServices();
+        services = ((RegisterUserActivity) requireActivity()).getServices();
         return inflater.inflate(R.layout.fragment_register_user, container, false);
     }
 
@@ -70,6 +75,18 @@ public class RegisterUserFragment extends Fragment {
                 .isConfirmPasswordValid(password, confirmPassword)) {
             confirmPasswordField.setError("Passwords must match");
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        launcher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    requireActivity().setResult(Activity.RESULT_OK);
+                    requireActivity().finish();
+                });
     }
 
     @Override
@@ -140,8 +157,10 @@ public class RegisterUserFragment extends Fragment {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             pd.dismiss();
-                            requireActivity().setResult(Activity.RESULT_OK);
-                            requireActivity().finish();
+
+                            Intent registerIntent = new Intent(requireContext(),
+                                    RegisterBusinessActivity.class);
+                            launcher.launch(registerIntent);
                         } else {
                             pd.dismiss();
                             services.getUtility().showDialog(requireActivity(),

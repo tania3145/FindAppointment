@@ -18,20 +18,20 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/user_button"
+        android:id="@+id/no_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/user_button_choice"
+        android:text="@string/no_button_choice"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/choose_text" />
 
     <Button
-        android:id="@+id/business_button"
+        android:id="@+id/yes_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/business_button_choice"
+        android:text="@string/yes_button_choice"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_button" />
+        app:layout_constraintTop_toBottomOf="@+id/no_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

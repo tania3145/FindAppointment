@@ -3,18 +3,13 @@ package com.example.findappointment;
 import static com.amulyakhare.textdrawable.util.ColorGenerator.MATERIAL;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.example.findappointment.data.User;
-import com.example.findappointment.databinding.ActivityMainBinding;
 import com.example.findappointment.services.Utility;
 import com.google.android.material.navigation.NavigationView;
 
@@ -60,8 +55,9 @@ public class MainActivity extends AppCompatActivity {
         navigationView.getMenu().getItem(0).setChecked(true);
         navigationView.getMenu().getItem(4).setOnMenuItemClickListener(menuItem -> {
             services.getDatabase().logout();
-            drawer.closeDrawer(GravityCompat.START);
             services.getUtility().showToast(this, "Successfully logged out");
+            goHome();
+            hideNav();
             return false;
         });
         services.getDatabase().getSignedInUser().addOnCompleteListener(task -> {
@@ -101,7 +97,8 @@ public class MainActivity extends AppCompatActivity {
         services = ((MainApplication) getApplication()).getServices();
 
         com.example.findappointment.databinding.ActivityMainBinding binding =
-                ActivityMainBinding.inflate(getLayoutInflater());
+                com.example.findappointment.databinding.ActivityMainBinding
+                        .inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.appBarMain.toolbar);
@@ -111,7 +108,11 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_login, R.id.nav_register)
+                R.id.nav_home,
+                R.id.nav_login,
+                R.id.nav_appointments,
+                R.id.nav_account,
+                R.id.nav_feedback)
                 .setOpenableLayout(drawer)
                 .build();
 
@@ -138,8 +139,13 @@ public class MainActivity extends AppCompatActivity {
                         services.getUtility().showToast(this,
                                 "Registered successfully");
                         goHome();
+                        hideNav();
                     }
                 });
+    }
+
+    public void hideNav() {
+        drawer.closeDrawer(GravityCompat.START);
     }
 
     public void goHome() {
@@ -151,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchRegisterActivity() {
-        Intent registerIntent = new Intent(this, RegisterActivity.class);
+        Intent registerIntent = new Intent(this, RegisterUserActivity.class);
         launcher.launch(registerIntent);
     }
 

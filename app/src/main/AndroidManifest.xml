@@ -13,21 +13,25 @@
         android:roundIcon="@mipmap/ic_app_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FindAppointment">
+        <activity
+            android:name=".RegisterBusinessActivity"
+            android:exported="false" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAbSiOrYILqgT8dJ8Nk8KTp_IHOWZ7HI9Y" />
 
         <activity
-            android:name=".RegisterActivity"
-            android:label="@string/register_header"
-            android:exported="false" />
-
+            android:name=".RegisterUserActivity"
+            android:exported="false"
+            android:label="@string/register_header" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.FindAppointment.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
