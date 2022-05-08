@@ -94,7 +94,7 @@ public class RegisterUserFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         firstNameField = (EditText) view.findViewById(R.id.first_name_field);
-        lastNameField = (EditText) view.findViewById(R.id.last_name_field);
+        lastNameField = (EditText) view.findViewById(R.id.name_field);
         emailField = (EditText) view.findViewById(R.id.email_field);
         passwordField = (EditText) view.findViewById(R.id.password_field);
         confirmPasswordField = (EditText) view.findViewById(R.id.confirm_password_field);

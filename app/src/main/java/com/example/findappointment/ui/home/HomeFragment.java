@@ -1,10 +1,7 @@
 package com.example.findappointment.ui.home;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.res.Resources;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,9 +19,6 @@ import com.example.findappointment.R;
 import com.example.findappointment.Services;
 import com.example.findappointment.data.Business;
 import com.example.findappointment.databinding.FragmentHomeBinding;
-import com.example.findappointment.services.Utility;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -34,13 +28,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
-import java.util.List;
-
 public class HomeFragment extends Fragment implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnCameraMoveStartedListener {
-
-    private static final float MAP_CAMERA_ZOOM = 13.5f;
 
     private static class MarkerData {
         private Business business;
@@ -74,7 +64,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
                              ViewGroup container, Bundle savedInstanceState) {
         viewModel = createViewModel();
 
-        FragmentHomeBinding binding = FragmentHomeBinding.inflate(inflater, container, false);
+        FragmentHomeBinding binding = FragmentHomeBinding.inflate(inflater,
+                container, false);
         View root = binding.getRoot();
 
         // Set location permissions.
@@ -112,37 +103,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         });
     }
 
-    private Location getLastKnownLocation() {
-        LocationManager locationManager = (LocationManager) requireActivity()
-                .getSystemService(Context.LOCATION_SERVICE);
-        List<String> providers = locationManager.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            @SuppressLint("MissingPermission") Location l = locationManager
-                    .getLastKnownLocation(provider);
-            if (l == null) {
-                continue;
-            }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = l;
-            }
-        }
-        return bestLocation;
-    }
-
-    private void centerUserLocation() {
-        Location currentLocation = getLastKnownLocation();
-        if (currentLocation == null) {
-            viewModel.getServices().getUtility().showDialog(getActivity(),
-                    Utility.DialogType.WARNING, "Could not retrieve user location.");
-            return;
-        }
-        LatLng currentLocationLatLng = new LatLng(currentLocation.getLatitude(),
-                currentLocation.getLongitude());
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocationLatLng, MAP_CAMERA_ZOOM));
-    }
-
     @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
@@ -170,7 +130,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         } catch (Resources.NotFoundException e) {
             Log.e(getString(R.string.app_tag), "Can't find style. Error: ", e);
         }
-        centerUserLocation();
+        viewModel.getServices().getLocation().centerUserLocation(requireActivity(), map);
     }
 
     @Override
@@ -187,15 +147,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public boolean onMarkerClick(@NonNull final Marker marker) {
-        map.animateCamera(CameraUpdateFactory
-                .newLatLngZoom(marker.getPosition(), MAP_CAMERA_ZOOM), 100,
-                new GoogleMap.CancelableCallback() {
-                    @Override
-                    public void onCancel() { }
-                    @Override
-                    public void onFinish() { }
-                });
-
+        viewModel.getServices().getLocation().moveMapCameraToLocation(map, marker.getPosition());
         marker.hideInfoWindow();
         if (sheet.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
             sheet.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);

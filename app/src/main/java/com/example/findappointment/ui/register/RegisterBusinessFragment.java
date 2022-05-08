@@ -32,8 +32,11 @@ public class RegisterBusinessFragment extends Fragment {
         });
         Button yesButton = view.findViewById(R.id.yes_button);
         yesButton.setOnClickListener(elView -> {
-            requireActivity().setResult(Activity.RESULT_OK);
-            requireActivity().finish();
+            RegisterBusinessDetailsFragment fragment = new RegisterBusinessDetailsFragment();
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.register_content_view, fragment)
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 }

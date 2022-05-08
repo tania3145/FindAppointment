@@ -33,4 +33,5 @@
     <string name="last_name_field_text">Last Name</string>
     <string name="confirm_password_field_text">Confirm Password</string>
     <string name="menu_register">Register</string>
+    <string name="business_submit_button">Add business</string>
 </resources>

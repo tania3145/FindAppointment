@@ -28,6 +28,10 @@ public class Database {
             return password.length() >= 6;
         }
 
+        public boolean isAddressValid(String address) {
+            return !address.isEmpty();
+        }
+
         public boolean isConfirmPasswordValid(String password, String confirmPassword) {
             return password.equals(confirmPassword);
         }
