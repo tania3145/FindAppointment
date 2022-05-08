@@ -1,5 +1,7 @@
 package com.example.findappointment.ui.register;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -115,15 +117,18 @@ public class RegisterUserDetailsFragment extends Fragment {
             verifyConfirmPassword();
         });
 
+        // TODO: Remove
+        firstNameField.setText("Tania");
+        lastNameField.setText("C");
+        emailField.setText("tania.c@gmail.com");
+        passwordField.setText("abcdef");
+        confirmPasswordField.setText("abcdef");
+
         Button registerButton = view.findViewById(R.id.register_button);
         registerButton.setOnClickListener(elView -> {
-            // TODO: Remove
-            firstNameField.setText("Tania");
-            lastNameField.setText("C");
-            emailField.setText("tania.c@gmail.com");
-            passwordField.setText("abcdef");
-            confirmPasswordField.setText("abcdef");
-
+            ProgressDialog pd = new ProgressDialog(requireActivity());
+            pd.setMessage("Loading ...");
+            pd.show();
             verifyFirstName();
             verifyLastName();
             verifyEmail();
@@ -131,14 +136,17 @@ public class RegisterUserDetailsFragment extends Fragment {
             verifyConfirmPassword();
             services.getDatabase().registerUser(firstNameField.getText().toString(),
                     lastNameField.getText().toString(), emailField.getText().toString(),
-                    passwordField.getText().toString(), confirmPasswordField.getText().toString(),
-                    user -> {
-                        requireActivity().finish();
-                        return null;
-                    }, error -> {
-                        services.getUtility().showDialog(requireActivity(),
-                                Utility.DialogType.INFO, error.getMessage());
-                        return null;
+                    passwordField.getText().toString(), confirmPasswordField.getText().toString())
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            pd.dismiss();
+                            requireActivity().setResult(Activity.RESULT_OK);
+                            requireActivity().finish();
+                        } else {
+                            pd.dismiss();
+                            services.getUtility().showDialog(requireActivity(),
+                                    Utility.DialogType.INFO, task.getException().getMessage());
+                        }
                     });
         });
     }

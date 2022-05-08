@@ -103,8 +103,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         Button makeAppointment = view.findViewById(R.id.make_appointment_button);
         makeAppointment.setOnClickListener(elView -> {
             if (!viewModel.getServices().getDatabase().isUserLoggedIn()) {
-                viewModel.getServices().getUtility().showToast(requireActivity(), "Please login");
-                ((MainActivity) requireActivity()).getNavController().navigate(R.id.nav_login);
+                viewModel.getServices().getUtility().showToast(requireActivity(),
+                        "Please login");
+                ((MainActivity) requireActivity()).goLogin();
                 return;
             }
             System.out.println("Make appointment");

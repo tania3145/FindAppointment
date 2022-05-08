@@ -1,5 +1,8 @@
 package com.example.findappointment;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -8,7 +11,10 @@ import android.view.View;
 import com.example.findappointment.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -19,15 +25,20 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
     private Services services;
     private NavigationView navigationView;
     private NavController navController;
+    private DrawerLayout drawer;
+    private ActivityResultLauncher<Intent> launcher;
 
     private void setupNotLogged() {
         navigationView.getMenu().clear();
         getMenuInflater().inflate(R.menu.logout_menu, navigationView.getMenu());
         navigationView.getMenu().getItem(0).setChecked(true);
+        navigationView.getMenu().getItem(2).setOnMenuItemClickListener(menuItem -> {
+            launchRegisterActivity();
+            return false;
+        });
     }
 
     private void setupLogged() {
@@ -36,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
         navigationView.getMenu().getItem(0).setChecked(true);
         navigationView.getMenu().getItem(4).setOnMenuItemClickListener(menuItem -> {
             services.getDatabase().logout();
-            return true;
+            drawer.closeDrawer(GravityCompat.START);
+            services.getUtility().showToast(this, "Successfully logged out");
+            return false;
         });
     }
 
@@ -45,18 +58,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         services = ((MainApplication) getApplication()).getServices();
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        com.example.findappointment.databinding.ActivityMainBinding binding =
+                ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.appBarMain.toolbar);
-//        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-        DrawerLayout drawer = binding.drawerLayout;
+        drawer = binding.drawerLayout;
         navigationView = binding.navView;
 
         // Passing each menu ID as a set of Ids because each
@@ -79,6 +86,31 @@ public class MainActivity extends AppCompatActivity {
                 setupNotLogged();
             }
         });
+
+        launcher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // There are no request codes
+                        // Intent data = result.getData();
+                        services.getUtility().showToast(this,
+                                "Registered successfully");
+                        goHome();
+                    }
+                });
+    }
+
+    public void goHome() {
+        navController.navigate(R.id.nav_home);
+    }
+
+    public void goLogin() {
+        navController.navigate(R.id.nav_login);
+    }
+
+    public void launchRegisterActivity() {
+        Intent registerIntent = new Intent(this, RegisterActivity.class);
+        launcher.launch(registerIntent);
     }
 
     @Override
@@ -92,10 +124,5 @@ public class MainActivity extends AppCompatActivity {
     @NonNull
     public Services getServices() {
         return services;
-    }
-
-    @NonNull
-    public NavController getNavController() {
-        return navController;
     }
 }

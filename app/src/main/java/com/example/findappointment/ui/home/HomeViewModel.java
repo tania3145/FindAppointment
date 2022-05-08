@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.findappointment.R;
 import com.example.findappointment.Services;
 import com.example.findappointment.data.Business;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -25,13 +27,13 @@ public class HomeViewModel extends ViewModel {
     public HomeViewModel(@NotNull Services services) {
         this.services = services;
         observableBusinesses = new MutableLiveData<>();
-        this.services.getDatabase().getBusinesses(businesses -> {
-            observableBusinesses.setValue(businesses);
-            return null;
-        }, error -> {
-            Log.e(getServices().getApplication().getResources().getString(R.string.app_tag),
-                    error.getMessage());
-            return null;
+        this.services.getDatabase().getBusinesses().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                observableBusinesses.setValue(task.getResult());
+            } else {
+                Log.e(getServices().getApplication().getResources().getString(R.string.app_tag),
+                        task.getException().getMessage());
+            }
         });
     }
 

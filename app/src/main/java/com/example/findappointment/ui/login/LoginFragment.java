@@ -1,6 +1,7 @@
 package com.example.findappointment.ui.login;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -15,12 +16,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.example.findappointment.MainActivity;
 import com.example.findappointment.RegisterActivity;
 import com.example.findappointment.R;
 import com.example.findappointment.Services;
+import com.example.findappointment.data.Business;
 import com.example.findappointment.services.Utility;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoginFragment extends Fragment {
 
@@ -29,25 +39,11 @@ public class LoginFragment extends Fragment {
     private EditText passwordField;
     private Button loginButton;
     private Button registerButton;
-    private ActivityResultLauncher<Intent> launcher;
-
-    private void goHome() {
-        ((MainActivity) requireActivity()).getNavController().navigate(R.id.nav_home);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         services = ((MainActivity) requireActivity()).getServices();
-        launcher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        // There are no request codes
-                        // Intent data = result.getData();
-                        goHome();
-                    }
-                });
     }
 
     @Override
@@ -73,26 +69,33 @@ public class LoginFragment extends Fragment {
                 emailField.setError("Email is invalid");
             }
         });
+        // TODO: Remove
+        emailField.setText("tania.c@gmail.com");
+        passwordField.setText("abcdef");
         loginButton.setOnClickListener(parentView -> {
-            // TODO: Remove
-            emailField.setText("tania.c@gmail.com");
-            passwordField.setText("abcdef");
-
             String email = emailField.getText().toString();
             String password = passwordField.getText().toString();
 
-            try {
-                services.getDatabase().loginUser(email, password);
-                goHome();
-
-            } catch (Exception e) {
-                services.getUtility().showDialog(requireActivity(), Utility.DialogType.INFO,
-                        e.getMessage());
-            }
+            ProgressDialog pd = new ProgressDialog(requireActivity());
+            pd.setMessage("Loading ...");
+            pd.show();
+            services.getDatabase().loginUser(email, password)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            services.getUtility().showToast(requireActivity(),
+                                    "Successfully logged in");
+                            ((MainActivity) requireActivity()).goHome();
+                            pd.dismiss();
+                        } else {
+                            services.getUtility()
+                                    .showDialog(requireActivity(), Utility.DialogType.INFO,
+                                            task.getException().getMessage());
+                            pd.dismiss();
+                        }
+                    });
         });
         registerButton.setOnClickListener(parentView -> {
-            Intent registerIntent = new Intent(requireActivity(), RegisterActivity.class);
-            launcher.launch(registerIntent);
+            ((MainActivity) requireActivity()).launchRegisterActivity();
         });
     }
 }

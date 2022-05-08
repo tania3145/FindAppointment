@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.example.findappointment.data.Business;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -61,40 +62,43 @@ public class Database {
         return auth.getCurrentUser();
     }
 
-    public void registerUser(String firstName, String lastName, String email,
-                             String password, String confirmPassword,
-                             Function<FirebaseUser, Void> successCallback,
-                             Function<Error, Void> failureCallback) {
+    public Task<AuthResult> registerUser(String firstName, String lastName, String email,
+                             String password, String confirmPassword) {
+        TaskCompletionSource<AuthResult> taskSource = new TaskCompletionSource<>();
         if (!validator.isNameValid(firstName) || !validator.isNameValid(lastName) ||
                 !validator.isLoginEmailValid(email) || !validator.isPasswordValid(password) ||
                 !validator.isConfirmPasswordValid(password, confirmPassword)) {
-            failureCallback.apply(new Error("Credentials are invalid."));
+            taskSource.setException(new IllegalArgumentException("Credentials are invalid."));
+            return taskSource.getTask();
         }
 
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     auth.signInWithEmailAndPassword(email, password);
-                    successCallback.apply(auth.getCurrentUser());
+                    taskSource.setResult(task.getResult());
                 } else {
-                    failureCallback.apply(new Error(task.getException().getMessage()));
+                    taskSource.setException(task.getException());
                 }
             });
+        return taskSource.getTask();
     }
 
-    public void loginUser(String email, String password) throws Exception {
+    public Task<AuthResult> loginUser(String email, String password) {
         if (!validator.isLoginEmailValid(email) || !validator.isPasswordValid(password)) {
-            throw new IllegalArgumentException("Credentials are invalid.");
+            TaskCompletionSource<AuthResult> taskSource = new TaskCompletionSource<>();
+            taskSource.setException(new IllegalArgumentException("Credentials are invalid."));
+            return taskSource.getTask();
         }
-        auth.signInWithEmailAndPassword(email, password);
+        return auth.signInWithEmailAndPassword(email, password);
     }
 
     public void logout() {
         auth.signOut();
     }
 
-    public void getBusinesses(Function<List<Business>, Void> successCallback,
-                              Function<Error, Void> failureCallback) {
+    public Task<List<Business>> getBusinesses() {
+        TaskCompletionSource<List<Business>> taskSource = new TaskCompletionSource<>();
         db.collection("businesses").get()
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -102,10 +106,11 @@ public class Database {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         businesses.add(Business.fromSnapshot(document));
                     }
-                    successCallback.apply(businesses);
+                    taskSource.setResult(businesses);
                 } else {
-                    failureCallback.apply(new Error("Could not find any businesses."));
+                    taskSource.setException(task.getException());
                 }
             });
+        return taskSource.getTask();
     }
 }
