@@ -42,21 +42,21 @@ public class RegisterUserFragment extends Fragment {
 
     private void verifyFirstName() {
         String name = firstNameField.getText().toString();
-        if (!services.getDatabase().getValidator().isNameValid(name)) {
+        if (!services.getDatabase().getValidator().isUserNameValid(name)) {
             firstNameField.setError("First name cannot be empty");
         }
     }
 
     private void verifyLastName() {
         String name = lastNameField.getText().toString();
-        if (!services.getDatabase().getValidator().isNameValid(name)) {
+        if (!services.getDatabase().getValidator().isUserNameValid(name)) {
             lastNameField.setError("Last name cannot be empty");
         }
     }
 
     private void verifyEmail() {
         String email = emailField.getText().toString();
-        if (!services.getDatabase().getValidator().isLoginEmailValid(email)) {
+        if (!services.getDatabase().getValidator().isEmailValid(email)) {
             emailField.setError("Email is invalid");
         }
     }
@@ -155,14 +155,12 @@ public class RegisterUserFragment extends Fragment {
                     lastNameField.getText().toString(), emailField.getText().toString(),
                     passwordField.getText().toString(), confirmPasswordField.getText().toString())
                     .addOnCompleteListener(task -> {
+                        pd.dismiss();
                         if (task.isSuccessful()) {
-                            pd.dismiss();
-
                             Intent registerIntent = new Intent(requireContext(),
                                     RegisterBusinessActivity.class);
                             launcher.launch(registerIntent);
                         } else {
-                            pd.dismiss();
                             services.getUtility().showDialog(requireActivity(),
                                     Utility.DialogType.INFO, task.getException().getMessage());
                         }

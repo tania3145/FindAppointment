@@ -51,7 +51,7 @@ public class LoginFragment extends Fragment {
                 return;
             }
             String email = emailField.getText().toString();
-            if (!services.getDatabase().getValidator().isLoginEmailValid(email)) {
+            if (!services.getDatabase().getValidator().isEmailValid(email)) {
                 emailField.setError("Email is invalid");
             }
         });

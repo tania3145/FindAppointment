@@ -31,6 +31,7 @@ import java.util.Scanner;
 
 public class Location {
     private static final float MAP_CAMERA_ZOOM = 13.5f;
+    public static final String GOOGLE_GEOCODING_API_KEY = "AIzaSyCzLlLgUXlmao9sD9LedwbOi6IOr2h9ydg";
 
     private Application application;
     private Permissions permissions;
@@ -85,19 +86,6 @@ public class Location {
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocationLatLng, MAP_CAMERA_ZOOM));
     }
 
-    private LatLng latLngFrom(JsonReader reader) throws Exception {
-        System.out.println(reader.toString());
-        List<Message> messages = new ArrayList<>();
-        return null;
-//        double latitude = ((JSONArray) obj.get("results")).getJSONObject(0)
-//                .getJSONObject("geometry").getJSONObject("location")
-//                .getDouble("lat");
-//        double longitude = ((JSONArray) obj.get("results")).getJSONObject(0)
-//                .getJSONObject("geometry").getJSONObject("location")
-//                .getDouble("lng");
-//        return new LatLng(latitude, longitude);
-    }
-
     public Task<LatLng> getLocationFromAddress(String address) {
         TaskCompletionSource<LatLng> taskSource = new TaskCompletionSource<>();
         Thread thread = new Thread(() -> {
@@ -105,7 +93,7 @@ public class Location {
             try {
                 URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?address=" +
                         Uri.encode(address) +
-                        "&sensor=true&key=AIzaSyCzLlLgUXlmao9sD9LedwbOi6IOr2h9ydg");
+                        "&sensor=true&key=" + GOOGLE_GEOCODING_API_KEY);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                 Scanner scanner = new Scanner(in);

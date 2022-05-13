@@ -7,31 +7,43 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.Map;
 
 public class Business {
+    private String id;
+    private String owner;
     private String name;
-    private BusinessType type;
+    private String email;
+    private String description;
+    private String phone;
     private LatLng location;
 
-    public Business(String name, BusinessType type, LatLng location) {
+    public Business(String id) {
+        this.id = id;
+    }
+
+    public Business(String id, String owner, String name, String email,
+                    String description, String phone, LatLng location) {
+        this.id = id;
+        this.owner = owner;
         this.name = name;
-        this.type = type;
+        this.email = email;
+        this.description = description;
+        this.phone = phone;
         this.location = location;
     }
 
-    public static Business fromSnapshot(QueryDocumentSnapshot document) {
-        String name = document.getString("name");
-        BusinessType type = BusinessType.valueOf(document.getString("type"));
-        GeoPoint point = document.getGeoPoint("location");
-        LatLng location = new LatLng(point.getLatitude(), point.getLongitude());
-        return new Business(name, type, location);
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public String toString() {
-        return "Business{" +
-                "name='" + name + '\'' +
-                ", type=" + type +
-                ", location=" + location +
-                '}';
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public String getName() {
@@ -42,12 +54,28 @@ public class Business {
         this.name = name;
     }
 
-    public BusinessType getType() {
-        return type;
+    public String getEmail() {
+        return email;
     }
 
-    public void setType(BusinessType type) {
-        this.type = type;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public LatLng getLocation() {

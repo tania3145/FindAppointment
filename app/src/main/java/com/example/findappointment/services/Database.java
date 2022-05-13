@@ -2,25 +2,26 @@ package com.example.findappointment.services;
 
 import com.example.findappointment.data.Business;
 import com.example.findappointment.data.User;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Database {
     public class Validator {
-        public boolean isLoginEmailValid(String email) {
-            return !email.isEmpty() && email.contains("@");
-        }
-
-        public boolean isNameValid(String name) {
+        public boolean isUserNameValid(String name) {
             return !name.isEmpty();
         }
 
@@ -28,12 +29,34 @@ public class Database {
             return password.length() >= 6;
         }
 
+        public boolean isConfirmPasswordValid(String password, String confirmPassword) {
+            return password.equals(confirmPassword);
+        }
+
+        public boolean isEmailValid(String email) {
+            return !email.isEmpty() && email.contains("@");
+        }
+
+        public boolean isBusinessNameValid(String name) {
+            return !name.isEmpty();
+        }
+
+        public boolean isPhoneValid(String phone) {
+            Pattern pattern = Pattern.compile("^[0-9]*$");
+            Matcher matcher = pattern.matcher(phone);
+            return !phone.isEmpty() && matcher.find();
+        }
+
+        public boolean isDescriptionValid(String desc) {
+            return true;
+        }
+
         public boolean isAddressValid(String address) {
             return !address.isEmpty();
         }
 
-        public boolean isConfirmPasswordValid(String password, String confirmPassword) {
-            return password.equals(confirmPassword);
+        public boolean isLocationValid(LatLng location) {
+            return location != null;
         }
     }
 
@@ -59,46 +82,27 @@ public class Database {
         return auth.getCurrentUser() != null;
     }
 
-    // TODO: Implement user
     public Task<User> getSignedInUser() {
         TaskCompletionSource<User> taskSource = new TaskCompletionSource<>();
         if (auth.getCurrentUser() == null) {
             taskSource.setException(new Exception("User is not logged in."));
             return taskSource.getTask();
         }
-        db.collection("users")
-                .document(auth.getCurrentUser().getUid())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot snapshot = task.getResult();
-                        if (!snapshot.exists()) {
-                            taskSource.setException(new Exception("Could not find user details."));
-                            return;
-                        }
-                        User user = new User(auth.getCurrentUser().getUid());
-                        if (snapshot.contains("first_name")) {
-                            user.setFirstName(snapshot.getString("first_name"));
-                        }
-                        if (snapshot.contains("last_name")) {
-                            user.setLastName(snapshot.getString("last_name"));
-                        }
-                        if (snapshot.contains("email")) {
-                            user.setEmail(snapshot.getString("email"));
-                        }
-                        taskSource.setResult(user);
-                    } else {
-                        taskSource.setException(task.getException());
-                    }
-                });
+        getUser(auth.getCurrentUser().getUid()).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                taskSource.setResult(task.getResult());
+            } else {
+                taskSource.setException(task.getException());
+            }
+        });
         return taskSource.getTask();
     }
 
     public Task<User> registerUser(String firstName, String lastName, String email,
                              String password, String confirmPassword) {
         TaskCompletionSource<User> taskSource = new TaskCompletionSource<>();
-        if (!validator.isNameValid(firstName) || !validator.isNameValid(lastName) ||
-                !validator.isLoginEmailValid(email) || !validator.isPasswordValid(password) ||
+        if (!validator.isUserNameValid(firstName) || !validator.isUserNameValid(lastName) ||
+                !validator.isEmailValid(email) || !validator.isPasswordValid(password) ||
                 !validator.isConfirmPasswordValid(password, confirmPassword)) {
             taskSource.setException(new IllegalArgumentException("Credentials are invalid."));
             return taskSource.getTask();
@@ -108,7 +112,7 @@ public class Database {
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     User user = new User(task.getResult().getUser().getUid(),
-                            firstName, lastName, email);
+                            firstName, lastName, email, new ArrayList<>());
 
                     db.collection("users")
                             .document(user.getId())
@@ -116,6 +120,7 @@ public class Database {
                                 put("first_name", user.getFirstName());
                                 put("last_name", user.getLastName());
                                 put("email", user.getEmail());
+                                put("businesses", new ArrayList<String>());
                             }}).addOnCompleteListener(storeTask -> {
                         if (storeTask.isSuccessful()) {
                             auth.signInWithEmailAndPassword(email, password)
@@ -137,8 +142,132 @@ public class Database {
         return taskSource.getTask();
     }
 
+    public Task<Business> registerBusiness(String userId, String name, String email,
+                                   String phone, String description, LatLng location) {
+        TaskCompletionSource<Business> taskSource = new TaskCompletionSource<>();
+        if (userId == null || !validator.isBusinessNameValid(name) ||
+                !validator.isEmailValid(email) || !validator.isDescriptionValid(description) ||
+                !validator.isPhoneValid(phone) || !validator.isLocationValid(location)) {
+            taskSource.setException(new IllegalArgumentException("Credentials are invalid."));
+            return taskSource.getTask();
+        }
+        Business business = new Business(null, userId, name, email,
+                description, phone, location);
+        Map<String, Object> data = new HashMap<String, Object>() {{
+            put("name", business.getName());
+            put("owner", business.getOwner());
+            put("email", business.getEmail());
+            put("description", business.getDescription());
+            put("phone", business.getPhone());
+            put("location", new GeoPoint(business.getLocation().latitude,
+                    business.getLocation().longitude));
+        }};
+        db.collection("businesses")
+                .add(data)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        getUser(business.getOwner()).addOnCompleteListener(userSearch -> {
+                            if (userSearch.isSuccessful()) {
+                                List<String> businesses = userSearch.getResult().getBusinesses();
+                                businesses.add(task.getResult().getId());
+                                db.collection("users")
+                                        .document(userSearch.getResult().getId())
+                                        .update(new HashMap<String, Object>() {{
+                                            put("businesses", businesses);
+                                        }});
+                                taskSource.setResult(business);
+                            } else {
+                                taskSource.setException(task.getException());
+                            }
+                        });
+                    } else {
+                        taskSource.setException(task.getException());
+                    }
+                });
+        return taskSource.getTask();
+    }
+
+    public Task<User> getUser(String userId) {
+        TaskCompletionSource<User> taskSource = new TaskCompletionSource<>();
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot snapshot = task.getResult();
+                        if (!snapshot.exists()) {
+                            taskSource.setException(new Exception("Could not find user details."));
+                            return;
+                        }
+                        User user = new User(userId);
+                        if (snapshot.contains("first_name")) {
+                            user.setFirstName(snapshot.getString("first_name"));
+                        }
+                        if (snapshot.contains("last_name")) {
+                            user.setLastName(snapshot.getString("last_name"));
+                        }
+                        if (snapshot.contains("email")) {
+                            user.setEmail(snapshot.getString("email"));
+                        }
+                        if (snapshot.contains("businesses")) {
+                            user.setBusinesses((List<String>) snapshot.get("businesses"));
+                        }
+                        taskSource.setResult(user);
+                    } else {
+                        taskSource.setException(task.getException());
+                    }
+                });
+        return taskSource.getTask();
+    }
+
+    private Business getBusinessFromSnapshot(DocumentSnapshot snapshot) {
+        Business business = new Business(snapshot.getId());
+        if (snapshot.contains("owner")) {
+            business.setName(snapshot.getString("owner"));
+        }
+        if (snapshot.contains("name")) {
+            business.setName(snapshot.getString("name"));
+        }
+        if (snapshot.contains("email")) {
+            business.setEmail(snapshot.getString("email"));
+        }
+        if (snapshot.contains("phone")) {
+            business.setPhone(snapshot.getString("phone"));
+        }
+        if (snapshot.contains("description")) {
+            business.setDescription(snapshot.getString("description"));
+        }
+        if (snapshot.contains("location")) {
+            GeoPoint point = snapshot.getGeoPoint("location");
+            LatLng location = new LatLng(point.getLatitude(), point.getLongitude());
+            business.setLocation(location);
+        }
+        return business;
+    }
+
+    public Task<Business> getBusiness(String businessId) {
+        TaskCompletionSource<Business> taskSource = new TaskCompletionSource<>();
+        db.collection("businesses")
+                .document(businessId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot snapshot = task.getResult();
+                        if (!snapshot.exists()) {
+                            taskSource.setException(
+                                    new Exception("Could not find business details."));
+                            return;
+                        }
+                        taskSource.setResult(getBusinessFromSnapshot(snapshot));
+                    } else {
+                        taskSource.setException(task.getException());
+                    }
+                });
+        return taskSource.getTask();
+    }
+
     public Task<AuthResult> loginUser(String email, String password) {
-        if (!validator.isLoginEmailValid(email) || !validator.isPasswordValid(password)) {
+        if (!validator.isEmailValid(email) || !validator.isPasswordValid(password)) {
             TaskCompletionSource<AuthResult> taskSource = new TaskCompletionSource<>();
             taskSource.setException(new IllegalArgumentException("Credentials are invalid."));
             return taskSource.getTask();
@@ -150,7 +279,7 @@ public class Database {
         auth.signOut();
     }
 
-    public Task<List<Business>> getBusinesses() {
+    public Task<List<Business>> getAllBusinesses() {
         TaskCompletionSource<List<Business>> taskSource = new TaskCompletionSource<>();
         db.collection("businesses")
                 .get()
@@ -158,7 +287,7 @@ public class Database {
                     if (task.isSuccessful()) {
                         List<Business> businesses = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            businesses.add(Business.fromSnapshot(document));
+                            businesses.add(getBusinessFromSnapshot(document));
                         }
                         taskSource.setResult(businesses);
                     } else {
