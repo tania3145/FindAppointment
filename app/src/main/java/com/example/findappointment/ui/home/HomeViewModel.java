@@ -3,6 +3,7 @@ package com.example.findappointment.ui.home;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -11,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.findappointment.R;
 import com.example.findappointment.Services;
 import com.example.findappointment.data.Business;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -25,13 +28,13 @@ public class HomeViewModel extends ViewModel {
     public HomeViewModel(@NotNull Services services) {
         this.services = services;
         observableBusinesses = new MutableLiveData<>();
-        this.services.getDatabase().getAllBusinesses().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                observableBusinesses.setValue(task.getResult());
-            } else {
+        this.services.getDatabase().subscribeToBusinesses((value, error) -> {
+            if (error != null || value == null) {
                 Log.e(getServices().getApplication().getResources().getString(R.string.app_tag),
-                        task.getException().getMessage());
+                        error.getMessage());
+                return;
             }
+            observableBusinesses.setValue(value);
         });
     }
 

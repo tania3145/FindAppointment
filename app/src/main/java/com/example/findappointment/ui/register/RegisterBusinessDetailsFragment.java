@@ -200,7 +200,8 @@ public class RegisterBusinessDetailsFragment extends Fragment implements OnMapRe
                     services.getDatabase().registerBusiness(task.getResult().getId(),
                             nameField.getText().toString(),
                             emailField.getText().toString(), phoneField.getText().toString(),
-                            descriptionField.getText().toString(), addressSearch)
+                            descriptionField.getText().toString(), addressSearch,
+                            addressField.getText().toString())
                             .addOnCompleteListener(businessTask -> {
                                 pd.dismiss();
                                 if (businessTask.isSuccessful()) {

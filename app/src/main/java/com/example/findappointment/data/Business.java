@@ -14,13 +14,14 @@ public class Business {
     private String description;
     private String phone;
     private LatLng location;
+    private String address;
 
     public Business(String id) {
         this.id = id;
     }
 
     public Business(String id, String owner, String name, String email,
-                    String description, String phone, LatLng location) {
+                    String description, String phone, LatLng location, String address) {
         this.id = id;
         this.owner = owner;
         this.name = name;
@@ -28,6 +29,7 @@ public class Business {
         this.description = description;
         this.phone = phone;
         this.location = location;
+        this.address = address;
     }
 
     public String getId() {
@@ -84,5 +86,13 @@ public class Business {
 
     public void setLocation(LatLng location) {
         this.location = location;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

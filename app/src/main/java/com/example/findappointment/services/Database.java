@@ -1,5 +1,7 @@
 package com.example.findappointment.services;
 
+import androidx.annotation.Nullable;
+
 import com.example.findappointment.data.Business;
 import com.example.findappointment.data.User;
 import com.google.android.gms.maps.model.LatLng;
@@ -8,9 +10,12 @@ import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -143,16 +148,18 @@ public class Database {
     }
 
     public Task<Business> registerBusiness(String userId, String name, String email,
-                                   String phone, String description, LatLng location) {
+                                   String phone, String description, LatLng location,
+                                           String address) {
         TaskCompletionSource<Business> taskSource = new TaskCompletionSource<>();
         if (userId == null || !validator.isBusinessNameValid(name) ||
                 !validator.isEmailValid(email) || !validator.isDescriptionValid(description) ||
-                !validator.isPhoneValid(phone) || !validator.isLocationValid(location)) {
+                !validator.isPhoneValid(phone) || !validator.isLocationValid(location) ||
+                !validator.isAddressValid(address)) {
             taskSource.setException(new IllegalArgumentException("Credentials are invalid."));
             return taskSource.getTask();
         }
         Business business = new Business(null, userId, name, email,
-                description, phone, location);
+                description, phone, location, address);
         Map<String, Object> data = new HashMap<String, Object>() {{
             put("name", business.getName());
             put("owner", business.getOwner());
@@ -161,6 +168,7 @@ public class Database {
             put("phone", business.getPhone());
             put("location", new GeoPoint(business.getLocation().latitude,
                     business.getLocation().longitude));
+            put("address", business.getAddress());
         }};
         db.collection("businesses")
                 .add(data)
@@ -295,5 +303,20 @@ public class Database {
                     }
                 });
         return taskSource.getTask();
+    }
+
+    public void subscribeToBusinesses(EventListener<List<Business>> listener) {
+        db.collection("businesses")
+                .addSnapshotListener((snapshot, error) -> {
+                    List<Business> businesses = new ArrayList<>();
+                    if (error != null || snapshot == null) {
+                        listener.onEvent(businesses, error);
+                        return;
+                    }
+                    for (QueryDocumentSnapshot document : snapshot) {
+                        businesses.add(getBusinessFromSnapshot(document));
+                    }
+                    listener.onEvent(businesses, null);
+                });
     }
 }
