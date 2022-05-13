@@ -38,4 +38,7 @@
     <string name="phone">Phone</string>
     <string name="email">Email</string>
     <string name="make_appointment_button">MAKE APPOINTMENT</string>
+    <string name="create_business">Add Business</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
 </resources>

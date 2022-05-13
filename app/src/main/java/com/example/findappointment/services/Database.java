@@ -195,6 +195,23 @@ public class Database {
         return taskSource.getTask();
     }
 
+    private User getUserFromSnapshot(DocumentSnapshot snapshot) {
+        User user = new User(snapshot.getId());
+        if (snapshot.contains("first_name")) {
+            user.setFirstName(snapshot.getString("first_name"));
+        }
+        if (snapshot.contains("last_name")) {
+            user.setLastName(snapshot.getString("last_name"));
+        }
+        if (snapshot.contains("email")) {
+            user.setEmail(snapshot.getString("email"));
+        }
+        if (snapshot.contains("businesses")) {
+            user.setBusinesses((List<String>) snapshot.get("businesses"));
+        }
+        return user;
+    }
+
     public Task<User> getUser(String userId) {
         TaskCompletionSource<User> taskSource = new TaskCompletionSource<>();
         db.collection("users")
@@ -207,20 +224,7 @@ public class Database {
                             taskSource.setException(new Exception("Could not find user details."));
                             return;
                         }
-                        User user = new User(userId);
-                        if (snapshot.contains("first_name")) {
-                            user.setFirstName(snapshot.getString("first_name"));
-                        }
-                        if (snapshot.contains("last_name")) {
-                            user.setLastName(snapshot.getString("last_name"));
-                        }
-                        if (snapshot.contains("email")) {
-                            user.setEmail(snapshot.getString("email"));
-                        }
-                        if (snapshot.contains("businesses")) {
-                            user.setBusinesses((List<String>) snapshot.get("businesses"));
-                        }
-                        taskSource.setResult(user);
+                        taskSource.setResult(getUserFromSnapshot(snapshot));
                     } else {
                         taskSource.setException(task.getException());
                     }
@@ -320,6 +324,18 @@ public class Database {
                         businesses.add(getBusinessFromSnapshot(document));
                     }
                     listener.onEvent(businesses, null);
+                });
+    }
+
+    public void subscribeToUser(String userId, EventListener<User> listener) {
+        db.collection("users")
+                .document(userId)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null) {
+                        listener.onEvent(null, error);
+                        return;
+                    }
+                    listener.onEvent(getUserFromSnapshot(snapshot), null);
                 });
     }
 }
