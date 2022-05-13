@@ -56,6 +56,7 @@ public class AccountFragment extends Fragment {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         services.getUtility().showToast(requireActivity(),
                                 "Successfully added business.");
+                        setAccountPageDetails();
                     } else {
                         services.getUtility().showToast(requireActivity(),
                                 "Couldn't add business.");
@@ -69,6 +70,84 @@ public class AccountFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_account, container, false);
     }
 
+    private void setAccountPageDetails() {
+        View view = requireView();
+        LinearLayout l = view.findViewById(R.id.businesses);
+        l.removeAllViews();
+
+        services.getDatabase().getSignedInUser()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        User value = task.getResult();
+                        if (!value.getFirstName().isEmpty() && !value.getLastName().isEmpty()) {
+                            String initials = "" + value.getFirstName().toUpperCase().charAt(0) +
+                                    value.getLastName().toUpperCase().charAt(0);
+
+                            // Set default image
+                            TextDrawable drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(HEADER_IMAGE_SIZE)
+                                    .height(HEADER_IMAGE_SIZE)
+                                    .endConfig()
+                                    .buildRound(initials, MATERIAL.getColor(initials));
+                            ImageView imageFrame = view.findViewById(R.id.account_image);
+                            imageFrame.setImageDrawable(drawable);
+                        }
+
+                        TextView firstName = view.findViewById(R.id.first_name_text_input);
+                        firstName.setText(value.getFirstName());
+
+                        TextView lastName = view.findViewById(R.id.last_name_text_input);
+                        lastName.setText(value.getLastName());
+
+                        TextView email = view.findViewById(R.id.email_text_input);
+                        email.setText(value.getEmail());
+
+                        if (value.getBusinesses().isEmpty()) {
+                            TextView noBusinessesText = new TextView(requireContext());
+                            noBusinessesText.setText("You do not own any businesses");
+                            noBusinessesText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                            l.addView(noBusinessesText);
+                            return;
+                        }
+
+                        List<Task<Business>> tasks = new ArrayList<>();
+                        for (String businessId : value.getBusinesses()) {
+                            tasks.add(services.getDatabase().getBusiness(businessId));
+                        }
+                        Tasks.whenAllComplete(tasks)
+                                .addOnCompleteListener(businessTasks -> {
+                                    if (businessTasks.isSuccessful()) {
+                                        for (Task<?> businessTask : businessTasks.getResult()) {
+                                            if (!businessTask.isSuccessful() ||
+                                                    !(businessTask.getResult() instanceof Business)) {
+                                                Log.e(getString(R.string.app_tag),
+                                                        businessTask.getException().getMessage());
+                                                continue;
+                                            }
+                                            Business business = ((Business) businessTask.getResult());
+
+                                            LinearLayout businessLayout = new LinearLayout(requireContext());
+                                            businessLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                            TextView businessName = new TextView(requireContext());
+                                            businessName.setText(business.getName());
+                                            Button viewButton = new Button(requireContext());
+                                            viewButton.setText("View");
+                                            businessLayout.addView(businessName);
+                                            businessLayout.addView(viewButton);
+                                            l.addView(businessLayout);
+                                        }
+                                    } else {
+                                        Log.e(getString(R.string.app_tag),
+                                                businessTasks.getException().getMessage());
+                                    }
+                                });
+                    } else {
+                        ((MainActivity) requireActivity()).goLogin();
+                    }
+                });
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -80,86 +159,6 @@ public class AccountFragment extends Fragment {
             launcher.launch(registerIntent);
         });
 
-        services.getDatabase().getSignedInUser()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        services.getDatabase().subscribeToUser(task.getResult().getId(),
-                                (value, error) -> {
-                            if (error != null || value == null) {
-                                services.getUtility().showDialog(requireActivity(),
-                                        Utility.DialogType.INFO,
-                                        error.getMessage());
-                                return;
-                            }
-                            if (!value.getFirstName().isEmpty() && !value.getLastName().isEmpty()) {
-                                String initials = "" + value.getFirstName().toUpperCase().charAt(0) +
-                                        value.getLastName().toUpperCase().charAt(0);
-
-                                // Set default image
-                                TextDrawable drawable = TextDrawable.builder()
-                                        .beginConfig()
-                                        .width(HEADER_IMAGE_SIZE)
-                                        .height(HEADER_IMAGE_SIZE)
-                                        .endConfig()
-                                        .buildRound(initials, MATERIAL.getColor(initials));
-                                ImageView imageFrame = view.findViewById(R.id.account_image);
-                                imageFrame.setImageDrawable(drawable);
-                            }
-
-                            TextView firstName = view.findViewById(R.id.first_name_text_input);
-                            firstName.setText(value.getFirstName());
-
-                            TextView lastName = view.findViewById(R.id.last_name_text_input);
-                            lastName.setText(value.getLastName());
-
-                            TextView email = view.findViewById(R.id.email_text_input);
-                            email.setText(value.getEmail());
-
-                            LinearLayout l = view.findViewById(R.id.businesses);
-
-                            if (value.getBusinesses().isEmpty()) {
-                                TextView noBusinessesText = new TextView(requireContext());
-                                noBusinessesText.setText("You do not own any businesses");
-                                noBusinessesText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                                l.addView(noBusinessesText);
-                                return;
-                            }
-
-                            List<Task<Business>> tasks = new ArrayList<>();
-                            for (String businessId : value.getBusinesses()) {
-                                tasks.add(services.getDatabase().getBusiness(businessId));
-                            }
-                            Tasks.whenAllComplete(tasks)
-                                    .addOnCompleteListener(businessTasks -> {
-                                        if (businessTasks.isSuccessful()) {
-                                            for (Task<?> businessTask : businessTasks.getResult()) {
-                                                if (!businessTask.isSuccessful() ||
-                                                        !(businessTask.getResult() instanceof Business)) {
-                                                    Log.e(getString(R.string.app_tag),
-                                                            businessTask.getException().getMessage());
-                                                    continue;
-                                                }
-                                                Business business = ((Business) businessTask.getResult());
-
-                                                LinearLayout businessLayout = new LinearLayout(requireContext());
-                                                businessLayout.setOrientation(LinearLayout.HORIZONTAL);
-                                                TextView businessName = new TextView(requireContext());
-                                                businessName.setText(business.getName());
-                                                Button viewButton = new Button(requireContext());
-                                                viewButton.setText("View");
-                                                businessLayout.addView(businessName);
-                                                businessLayout.addView(viewButton);
-                                                l.addView(businessLayout);
-                                            }
-                                        } else {
-                                            Log.e(getString(R.string.app_tag),
-                                                    businessTasks.getException().getMessage());
-                                        }
-                                    });
-                        });
-                    } else {
-                        ((MainActivity) requireActivity()).goLogin();
-                    }
-                });
+        setAccountPageDetails();
     }
 }
