@@ -18,15 +18,21 @@ import com.example.findappointment.MainActivity;
 import com.example.findappointment.R;
 import com.example.findappointment.Services;
 import com.example.findappointment.data.Business;
+import com.example.findappointment.data.User;
 import com.example.findappointment.databinding.FragmentHomeBinding;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
@@ -110,13 +116,26 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
 
         viewModel.getBusinesses().observe(getViewLifecycleOwner(), businesses -> {
             this.map.clear();
-            for (Business business : businesses) {
-                Marker m = this.map.addMarker(new MarkerOptions()
-                        .position(business.getLocation())
-                        .title(business.getName()));
-                assert m != null;
-                m.setTag(new MarkerData(business));
-            }
+            AtomicReference<String> userId = new AtomicReference<>("");
+            viewModel.getServices().getDatabase().getSignedInUser()
+                    .addOnSuccessListener(user -> {
+                userId.set(user.getId());
+            }).addOnCompleteListener(task -> {
+                for (Business business : businesses) {
+                    MarkerOptions markerOptions = new MarkerOptions()
+                            .position(business.getLocation())
+                            .title(business.getName());
+
+                    if (!userId.get().isEmpty()) {
+                        markerOptions.icon(BitmapDescriptorFactory
+                                .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                    }
+
+                    Marker m = this.map.addMarker(markerOptions);
+                    assert m != null;
+                    m.setTag(new MarkerData(business));
+                }
+            });
         });
         map.setMyLocationEnabled(true);
         map.setOnMarkerClickListener(this);
@@ -157,6 +176,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         assert data != null;
         TextView businessNameText = requireView().findViewById(R.id.bottom_sheet_business_name);
         businessNameText.setText(data.getBusiness().getName());
+
+        TextView businessAddressText = requireView()
+                .findViewById(R.id.bottom_sheet_business_address);
+        businessAddressText.setText(data.getBusiness().getAddress());
+
+        TextView businessPhoneText = requireView()
+                .findViewById(R.id.bottom_sheet_business_phone);
+        businessPhoneText.setText(data.getBusiness().getPhone());
+
+        TextView businessEmailText = requireView()
+                .findViewById(R.id.bottom_sheet_business_email);
+        businessEmailText.setText(data.getBusiness().getEmail());
 
         return true;
     }

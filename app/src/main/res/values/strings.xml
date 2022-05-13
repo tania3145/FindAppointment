@@ -34,4 +34,8 @@
     <string name="confirm_password_field_text">Confirm Password</string>
     <string name="menu_register">Register</string>
     <string name="business_submit_button">Add business</string>
+    <string name="contact">Contact</string>
+    <string name="phone">Phone</string>
+    <string name="email">Email</string>
+    <string name="make_appointment_button">MAKE APPOINTMENT</string>
 </resources>

@@ -231,7 +231,7 @@ public class Database {
     private Business getBusinessFromSnapshot(DocumentSnapshot snapshot) {
         Business business = new Business(snapshot.getId());
         if (snapshot.contains("owner")) {
-            business.setName(snapshot.getString("owner"));
+            business.setOwner(snapshot.getString("owner"));
         }
         if (snapshot.contains("name")) {
             business.setName(snapshot.getString("name"));
@@ -244,6 +244,9 @@ public class Database {
         }
         if (snapshot.contains("description")) {
             business.setDescription(snapshot.getString("description"));
+        }
+        if (snapshot.contains("address")) {
+            business.setAddress(snapshot.getString("address"));
         }
         if (snapshot.contains("location")) {
             GeoPoint point = snapshot.getGeoPoint("location");
