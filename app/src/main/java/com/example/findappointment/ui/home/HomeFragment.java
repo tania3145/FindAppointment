@@ -1,6 +1,7 @@
 package com.example.findappointment.ui.home;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,10 +11,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.findappointment.BusinessDetailsActivity;
 import com.example.findappointment.MainActivity;
 import com.example.findappointment.R;
 import com.example.findappointment.Services;
@@ -57,6 +61,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
     private GoogleMap map;
     private BottomSheetBehavior sheet;
     private HomeViewModel viewModel;
+    private ActivityResultLauncher<Intent> businessLauncher;
 
     private HomeViewModel createViewModel() {
         Services services = ((MainActivity) requireActivity()).getServices();
@@ -77,6 +82,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         // Set location permissions.
         viewModel.getServices().getPermissions().requireLocation(getActivity());
 
+        businessLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> { });
+
         // Initialise map.
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
@@ -96,17 +105,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         View bottomSheet = view.findViewById(R.id.bottom_sheet);
         sheet = BottomSheetBehavior.from(bottomSheet);
         sheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-        Button makeAppointment = view.findViewById(R.id.make_appointment_button);
-        makeAppointment.setOnClickListener(elView -> {
-            if (!viewModel.getServices().getDatabase().isUserLoggedIn()) {
-                viewModel.getServices().getUtility().showToast(requireActivity(),
-                        "Please login");
-                ((MainActivity) requireActivity()).goLogin();
-                return;
-            }
-            System.out.println("Make appointment");
-        });
     }
 
     @SuppressLint("MissingPermission")
@@ -188,6 +186,25 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         TextView businessEmailText = requireView()
                 .findViewById(R.id.bottom_sheet_business_email);
         businessEmailText.setText(data.getBusiness().getEmail());
+
+        Button makeAppointment = requireView().findViewById(R.id.make_appointment_button);
+        makeAppointment.setOnClickListener(elView -> {
+            if (!viewModel.getServices().getDatabase().isUserLoggedIn()) {
+                viewModel.getServices().getUtility().showToast(requireActivity(),
+                        "Please login");
+                ((MainActivity) requireActivity()).goLogin();
+                return;
+            }
+            System.out.println("Make appointment");
+        });
+        Button viewBusiness = requireView().findViewById(R.id.view_button);
+        viewBusiness.setOnClickListener(elView -> {
+            data.getBusiness().getId();
+            Intent businessIntent = new Intent(requireContext(),
+                    BusinessDetailsActivity.class);
+            businessIntent.putExtra("businessId", data.getBusiness().getId());
+            businessLauncher.launch(businessIntent);
+        });
 
         return true;
     }

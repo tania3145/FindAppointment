@@ -10,6 +10,7 @@
         <entry key="app/src/main/res/drawable/ic_menu_home.xml" value="0.1645" />
         <entry key="app/src/main/res/drawable/ic_menu_slideshow.xml" value="0.583" />
         <entry key="app/src/main/res/drawable/side_nav_bar.xml" value="0.583" />
+        <entry key="app/src/main/res/layout/activity_business_details.xml" value="0.30512820512820515" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.30512820512820515" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.165" />
         <entry key="app/src/main/res/layout/activity_register.xml" value="0.1" />
@@ -20,6 +21,7 @@
         <entry key="app/src/main/res/layout/content_main.xml" value="0.22272949218750002" />
         <entry key="app/src/main/res/layout/fragment_account.xml" value="0.335" />
         <entry key="app/src/main/res/layout/fragment_appointments.xml" value="0.29583333333333334" />
+        <entry key="app/src/main/res/layout/fragment_business_details.xml" value="0.30512820512820515" />
         <entry key="app/src/main/res/layout/fragment_feedback.xml" value="0.29583333333333334" />
         <entry key="app/src/main/res/layout/fragment_gallery.xml" value="0.5911458333333334" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1" />

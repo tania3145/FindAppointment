@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.example.findappointment.BusinessDetailsActivity;
 import com.example.findappointment.MainActivity;
 import com.example.findappointment.MainApplication;
 import com.example.findappointment.R;
@@ -30,12 +30,8 @@ import com.example.findappointment.RegisterBusinessActivity;
 import com.example.findappointment.Services;
 import com.example.findappointment.data.Business;
 import com.example.findappointment.data.User;
-import com.example.findappointment.services.Database;
-import com.example.findappointment.services.Utility;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +40,7 @@ public class AccountFragment extends Fragment {
     private static final int HEADER_IMAGE_SIZE = 150;
     private Services services;
     private ActivityResultLauncher<Intent> launcher;
+    private ActivityResultLauncher<Intent> businessLauncher;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,6 +59,10 @@ public class AccountFragment extends Fragment {
                                 "Couldn't add business.");
                     }
                 });
+
+        businessLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> { });
     }
 
     @Override
@@ -136,6 +137,14 @@ public class AccountFragment extends Fragment {
                                             businessLayout.addView(businessName);
                                             businessLayout.addView(viewButton);
                                             l.addView(businessLayout);
+
+                                            viewButton.setOnClickListener(elView -> {
+                                                Intent businessIntent = new Intent(requireContext(),
+                                                        BusinessDetailsActivity.class);
+                                                businessIntent.putExtra("businessId",
+                                                        business.getId());
+                                                businessLauncher.launch(businessIntent);
+                                            });
                                         }
                                     } else {
                                         Log.e(getString(R.string.app_tag),

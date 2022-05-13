@@ -17,7 +17,10 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAbSiOrYILqgT8dJ8Nk8KTp_IHOWZ7HI9Y" />
-
+        <activity
+            android:name=".BusinessDetailsActivity"
+            android:exported="false"
+            android:label="@string/business_page" />
         <activity
             android:name=".RegisterUserActivity"
             android:exported="false"

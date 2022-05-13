@@ -41,4 +41,6 @@
     <string name="create_business">Add Business</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
+    <string name="business_page">Business</string>
+    <string name="view_business">VIEW BUSINESS</string>
 </resources>

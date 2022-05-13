@@ -108,6 +108,15 @@
             android:foreground="?attr/selectableItemBackground"
             android:text="@string/make_appointment_button"
             android:textColor="#fff" />
+        <Button
+            android:id="@+id/view_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:background="#000"
+            android:foreground="?attr/selectableItemBackground"
+            android:text="@string/view_business"
+            android:textColor="#fff" />
 
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
