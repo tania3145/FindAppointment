@@ -19,9 +19,61 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.findappointment.R;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.CalendarMode;
+import com.prolificinteractive.materialcalendarview.DayViewDecorator;
+import com.prolificinteractive.materialcalendarview.DayViewFacade;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CalendarFragment extends Fragment {
+
+    public interface OnClickListener {
+        void onClick(Event event);
+    }
+
+    public static class Event {
+        private CalendarDay day;
+        private int hour;
+        private String name;
+
+        public Event(CalendarDay day, int hour, String name) {
+            this.day = day;
+            this.hour = hour;
+            this.name = name;
+        }
+
+        public CalendarDay getDay() {
+            return day;
+        }
+
+        public void setDay(CalendarDay day) {
+            this.day = day;
+        }
+
+        public int getHour() {
+            return hour;
+        }
+
+        public void setHour(int hour) {
+            this.hour = hour;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 
     private static class DayItemData {
         public static class Builder {
@@ -50,8 +102,8 @@ public class CalendarFragment extends Fragment {
                 return this;
             }
 
-            public Builder withHasEvent(boolean hasEvent) {
-                item.hasEvent = hasEvent;
+            public Builder withEvent(Event event) {
+                item.event = event;
                 return this;
             }
 
@@ -63,7 +115,7 @@ public class CalendarFragment extends Fragment {
         private String hour;
         private int index;
         private boolean isAvailable;
-        private boolean hasEvent;
+        private Event event;
 
         private DayItemData() { }
 
@@ -79,8 +131,8 @@ public class CalendarFragment extends Fragment {
             return isAvailable;
         }
 
-        public boolean isHasEvent() {
-            return hasEvent;
+        public Event getEvent() {
+            return event;
         }
     }
 
@@ -105,21 +157,32 @@ public class CalendarFragment extends Fragment {
 
         public void setUnavailable() {
             eventLayout.setBackgroundColor(Color.parseColor("#DAFFFC"));
+            eventButton.setVisibility(View.INVISIBLE);
         }
 
         public void setAvailable() {
             eventLayout.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            eventButton.setVisibility(View.INVISIBLE);
         }
 
-        public void addEvent() {
-
+        public void setEvent(Event event, OnClickListener onEventClickListener) {
+            eventButton.setText(event.name);
+            eventButton.setVisibility(View.VISIBLE);
+            if (onEventClickListener == null) {
+                return;
+            }
+            eventButton.setOnClickListener(view -> {
+                onEventClickListener.onClick(event);
+            });
         }
     }
 
     private RecyclerView dayView;
     private RecyclerView.Adapter<DayItem> dayViewAdapter;
     private DayItemData[] hours;
+    private Map<CalendarDay, List<Event>> events;
     private MaterialCalendarView calendar;
+    private OnClickListener onEventClickListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -140,6 +203,39 @@ public class CalendarFragment extends Fragment {
                     .withIsAvailable(false)
                     .build();
         }
+        events = new HashMap<>();
+    }
+
+    private DayOfWeek getDayOfWeek(CalendarDay day) {
+        return LocalDate.of(day.getYear(), day.getMonth() + 1, day.getDay()).getDayOfWeek();
+    }
+
+    private CalendarDay nextDay(CalendarDay day) {
+        LocalDate nextDay = LocalDate.of(day.getYear(), day.getMonth() + 1, day.getDay());
+        nextDay = nextDay.plusDays(1);
+        return CalendarDay.from(nextDay.getYear(),
+                nextDay.getMonth().getValue() - 1, nextDay.getDayOfMonth());
+    }
+
+    private void reloadListDataWithCurrentDate() {
+        if (calendar == null) {
+            return;
+        }
+        List<Event> listOfEvents = events.getOrDefault(calendar.getSelectedDate(),
+                new ArrayList<>());
+        for (int i = 0; i < hours.length; i++) {
+            hours[i] = new DayItemData.Builder(hours[i])
+                    .withEvent(null)
+                    .build();
+        }
+        for (Event e : listOfEvents) {
+            hours[e.getHour()] = new DayItemData.Builder(hours[e.getHour()])
+                    .withIsAvailable(false)
+                    .withEvent(e)
+                    .build();
+            dayViewAdapter.notifyItemChanged(e.getHour());
+        }
+        dayViewAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -148,6 +244,32 @@ public class CalendarFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_calendar, container, false);
 
         calendar = root.findViewById(R.id.calendar_view);
+        calendar.state().edit()
+                .setMinimumDate(CalendarDay.today())
+                .setCalendarDisplayMode(CalendarMode.WEEKS)
+                .commit();
+        CalendarDay next = CalendarDay.today();
+        DayOfWeek dof = getDayOfWeek(next);
+        while (dof == DayOfWeek.SUNDAY || dof == DayOfWeek.SATURDAY) {
+            next = nextDay(next);
+            dof = getDayOfWeek(next);
+        }
+        calendar.setSelectedDate(next);
+        calendar.addDecorator(new DayViewDecorator() {
+            @Override
+            public boolean shouldDecorate(CalendarDay day) {
+                DayOfWeek dof = getDayOfWeek(day);
+                return dof == DayOfWeek.SUNDAY || dof == DayOfWeek.SATURDAY;
+            }
+
+            @Override
+            public void decorate(DayViewFacade view) {
+                view.setDaysDisabled(true);
+            }
+        });
+        calendar.setOnDateChangedListener((widget, date, selected) -> {
+            reloadListDataWithCurrentDate();
+        });
 
         dayView = root.findViewById(R.id.day_view);
         dayView.addItemDecoration(new DividerItemDecoration(requireContext(),
@@ -172,6 +294,9 @@ public class CalendarFragment extends Fragment {
                 } else {
                     holder.setUnavailable();
                 }
+                if (hours[position].getEvent() != null) {
+                    holder.setEvent(hours[position].getEvent(), onEventClickListener);
+                }
             }
 
             @Override
@@ -180,6 +305,7 @@ public class CalendarFragment extends Fragment {
             }
         };
         dayView.setAdapter(dayViewAdapter);
+        reloadListDataWithCurrentDate();
         return root;
     }
 
@@ -188,12 +314,10 @@ public class CalendarFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         scrollToHour(7);
-        setAvailability(9, 17);
+        // setAvailability(9, 17);
     }
 
     public void setAvailability(int startHour, int endHour) {
-        // calendar.;
-
         for (int i = 0; i < hours.length; i++) {
             hours[i] = new DayItemData.Builder(hours[i])
                     .withIsAvailable(true)
@@ -217,7 +341,16 @@ public class CalendarFragment extends Fragment {
         dayView.scrollToPosition(hour);
     }
 
-    public void addEvent() {
-        System.out.println("Added event");
+    public void addEvents(List<Event> events) {
+        for (Event event : events) {
+            List<Event> listOfEvents = this.events.getOrDefault(event.getDay(), new ArrayList<>());
+            listOfEvents.add(event);
+            this.events.put(event.getDay(), listOfEvents);
+        }
+        reloadListDataWithCurrentDate();
+    }
+
+    public void addOnEventClickListener(OnClickListener listener) {
+        onEventClickListener = listener;
     }
 }

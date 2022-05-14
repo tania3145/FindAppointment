@@ -18,6 +18,9 @@ import com.example.findappointment.R;
 import com.example.findappointment.Services;
 import com.example.findappointment.data.Business;
 import com.example.findappointment.ui.calendar.CalendarFragment;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+
+import java.util.ArrayList;
 
 public class MakeAppointmentFragment extends Fragment {
     private Services services;
@@ -42,7 +45,15 @@ public class MakeAppointmentFragment extends Fragment {
 
         FragmentContainerView calendarContainer = view.findViewById(R.id.calendar_fragment_view);
         CalendarFragment calendarFragment = calendarContainer.getFragment();
-        calendarFragment.addEvent();
+        calendarFragment.addOnEventClickListener(event -> {
+            System.out.println(event.getName());
+        });
+        calendarFragment.addEvents(new ArrayList<CalendarFragment.Event>() {{
+            add(new CalendarFragment.Event(CalendarDay.from(2022, 4, 16), 13, "ABC"));
+            add(new CalendarFragment.Event(CalendarDay.from(2022, 4, 16), 16, "DEF"));
+            add(new CalendarFragment.Event(CalendarDay.from(2022, 4, 17),
+                    15, "ALSC"));
+        }});
 
         String businessId = ((MakeAppointmentActivity) requireActivity()).getBusinessId();
         System.out.println("businessId: " + businessId);
