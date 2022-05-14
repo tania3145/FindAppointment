@@ -43,4 +43,5 @@
     <string name="last_name">Last Name</string>
     <string name="business_page">Business</string>
     <string name="view_business">VIEW BUSINESS</string>
+    <string name="make_appointment">Make Appointment</string>
 </resources>

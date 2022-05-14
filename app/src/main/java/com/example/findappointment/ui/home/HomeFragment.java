@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.findappointment.BusinessDetailsActivity;
 import com.example.findappointment.MainActivity;
+import com.example.findappointment.MakeAppointmentActivity;
 import com.example.findappointment.R;
 import com.example.findappointment.Services;
 import com.example.findappointment.data.Business;
@@ -62,6 +63,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
     private BottomSheetBehavior sheet;
     private HomeViewModel viewModel;
     private ActivityResultLauncher<Intent> businessLauncher;
+    private ActivityResultLauncher<Intent> makeAppointmentLauncher;
 
     private HomeViewModel createViewModel() {
         Services services = ((MainActivity) requireActivity()).getServices();
@@ -83,6 +85,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
         viewModel.getServices().getPermissions().requireLocation(getActivity());
 
         businessLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> { });
+
+        makeAppointmentLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> { });
 
@@ -195,7 +201,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
                 ((MainActivity) requireActivity()).goLogin();
                 return;
             }
-            System.out.println("Make appointment");
+            Intent intent = new Intent(requireContext(), MakeAppointmentActivity.class);
+            intent.putExtra("businessId", data.getBusiness().getId());
+            makeAppointmentLauncher.launch(intent);
         });
         Button viewBusiness = requireView().findViewById(R.id.view_button);
         viewBusiness.setOnClickListener(elView -> {
