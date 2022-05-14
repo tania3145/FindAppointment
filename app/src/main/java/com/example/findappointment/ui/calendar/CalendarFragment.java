@@ -44,6 +44,7 @@ public class CalendarFragment extends Fragment {
         private int hour;
         private String name;
         private boolean show;
+        private Object data;
 
         public Event(String name) {
             this(CalendarDay.today(), 0, name, true);
@@ -90,6 +91,14 @@ public class CalendarFragment extends Fragment {
 
         public void setShow(boolean show) {
             this.show = show;
+        }
+
+        public Object getData() {
+            return data;
+        }
+
+        public void setData(Object data) {
+            this.data = data;
         }
     }
 

@@ -2,8 +2,11 @@ package com.example.findappointment.ui.appointments;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -13,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.findappointment.BusinessDetailsActivity;
 import com.example.findappointment.MainApplication;
 import com.example.findappointment.R;
 import com.example.findappointment.Services;
@@ -33,12 +37,16 @@ import java.util.List;
 
 public class AppointmentsFragment extends Fragment {
     private Services services;
+    private ActivityResultLauncher<Intent> businessLauncher;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         services = ((MainApplication) requireActivity().getApplication()).getServices();
+        businessLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> { });
     }
 
     @Override
@@ -57,7 +65,10 @@ public class AppointmentsFragment extends Fragment {
         FragmentContainerView calendarContainer = view.findViewById(R.id.calendar_fragment_view);
         CalendarFragment calendarFragment = calendarContainer.getFragment();
         calendarFragment.addOnEventClickListener(event -> {
-            // TODO
+            Intent businessIntent = new Intent(requireContext(),
+                    BusinessDetailsActivity.class);
+            businessIntent.putExtra("businessId", ((Business) event.getData()).getId());
+            businessLauncher.launch(businessIntent);
         });
         calendarFragment.setAvailability(0, 23);
         services.getDatabase().getSignedInUser().addOnSuccessListener(user -> {
@@ -75,6 +86,7 @@ public class AppointmentsFragment extends Fragment {
                                     int hour = d.getHours();
                                     CalendarFragment.Event e = new CalendarFragment.Event(day, hour,
                                             business.getName());
+                                    e.setData(business);
                                     taskSource.setResult(e);
                                 });
                             tasks.add(taskSource.getTask());

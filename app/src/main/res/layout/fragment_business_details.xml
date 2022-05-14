@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -131,26 +131,13 @@
 
         </TableLayout>
 
-        <TextView
-            android:id="@+id/appointments_text"
-            android:layout_width="wrap_content"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/calendar_fragment_view"
+            android:name="com.example.findappointment.ui.calendar.CalendarFragment"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Appointments"
-            android:visibility="invisible" />
-
-        <ScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="40dp"
-            android:layout_marginRight="40dp">
-
-            <LinearLayout
-                android:id="@+id/appointments"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"/>
-        </ScrollView>
+            android:minHeight="500dp" />
 
     </LinearLayout>
 
-</FrameLayout>
+</ScrollView>
