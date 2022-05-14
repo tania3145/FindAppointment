@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:weightSum="1"
     tools:context=".ui.calendar.CalendarFragment">
 
 
@@ -11,16 +10,16 @@
         android:id="@+id/hour_text"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="0.2"
-        android:text="00:00"
         android:gravity="center"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="00:00"
         android:textSize="18sp" />
 
     <LinearLayout
         android:id="@+id/event_layout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.8"
         android:background="#DAFFFC"
         android:orientation="vertical">
 

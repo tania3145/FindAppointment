@@ -43,11 +43,21 @@ public class CalendarFragment extends Fragment {
         private CalendarDay day;
         private int hour;
         private String name;
+        private boolean show;
+
+        public Event(String name) {
+            this(CalendarDay.today(), 0, name, true);
+        }
 
         public Event(CalendarDay day, int hour, String name) {
+            this(day, hour, name, true);
+        }
+
+        public Event(CalendarDay day, int hour, String name, boolean show) {
             this.day = day;
             this.hour = hour;
             this.name = name;
+            this.show = show;
         }
 
         public CalendarDay getDay() {
@@ -72,6 +82,14 @@ public class CalendarFragment extends Fragment {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public boolean isShow() {
+            return show;
+        }
+
+        public void setShow(boolean show) {
+            this.show = show;
         }
     }
 
@@ -166,6 +184,9 @@ public class CalendarFragment extends Fragment {
         }
 
         public void setEvent(Event event, OnClickListener onEventClickListener) {
+            if (!event.isShow()) {
+                return;
+            }
             eventButton.setText(event.name);
             eventButton.setVisibility(View.VISIBLE);
             if (onEventClickListener == null) {
@@ -183,6 +204,7 @@ public class CalendarFragment extends Fragment {
     private Map<CalendarDay, List<Event>> events;
     private MaterialCalendarView calendar;
     private OnClickListener onEventClickListener;
+    private Event defaultEvent;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -217,27 +239,6 @@ public class CalendarFragment extends Fragment {
                 nextDay.getMonth().getValue() - 1, nextDay.getDayOfMonth());
     }
 
-    private void reloadListDataWithCurrentDate() {
-        if (calendar == null) {
-            return;
-        }
-        List<Event> listOfEvents = events.getOrDefault(calendar.getSelectedDate(),
-                new ArrayList<>());
-        for (int i = 0; i < hours.length; i++) {
-            hours[i] = new DayItemData.Builder(hours[i])
-                    .withEvent(null)
-                    .build();
-        }
-        for (Event e : listOfEvents) {
-            hours[e.getHour()] = new DayItemData.Builder(hours[e.getHour()])
-                    .withIsAvailable(false)
-                    .withEvent(e)
-                    .build();
-            dayViewAdapter.notifyItemChanged(e.getHour());
-        }
-        dayViewAdapter.notifyDataSetChanged();
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -268,7 +269,7 @@ public class CalendarFragment extends Fragment {
             }
         });
         calendar.setOnDateChangedListener((widget, date, selected) -> {
-            reloadListDataWithCurrentDate();
+            reload();
         });
 
         dayView = root.findViewById(R.id.day_view);
@@ -305,7 +306,7 @@ public class CalendarFragment extends Fragment {
             }
         };
         dayView.setAdapter(dayViewAdapter);
-        reloadListDataWithCurrentDate();
+        reload();
         return root;
     }
 
@@ -314,7 +315,6 @@ public class CalendarFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         scrollToHour(7);
-        // setAvailability(9, 17);
     }
 
     public void setAvailability(int startHour, int endHour) {
@@ -327,14 +327,13 @@ public class CalendarFragment extends Fragment {
             hours[i] = new DayItemData.Builder(hours[i])
                     .withIsAvailable(false)
                     .build();
-            dayViewAdapter.notifyItemChanged(i);
         }
         for (int i = endHour; i < hours.length; i++) {
             hours[i] = new DayItemData.Builder(hours[i])
                     .withIsAvailable(false)
                     .build();
-            dayViewAdapter.notifyItemChanged(i);
         }
+        reload();
     }
 
     public void scrollToHour(int hour) {
@@ -347,10 +346,41 @@ public class CalendarFragment extends Fragment {
             listOfEvents.add(event);
             this.events.put(event.getDay(), listOfEvents);
         }
-        reloadListDataWithCurrentDate();
+        reload();
+    }
+
+    public void addDefaultDayEvent(Event event) {
+        defaultEvent = event;
+        reload();
     }
 
     public void addOnEventClickListener(OnClickListener listener) {
         onEventClickListener = listener;
+    }
+
+    public void reload() {
+        if (calendar == null || dayViewAdapter == null) {
+            return;
+        }
+        List<Event> listOfEvents = events.getOrDefault(calendar.getSelectedDate(),
+                new ArrayList<>());
+        for (int i = 0; i < hours.length; i++) {
+            DayItemData.Builder builder = new DayItemData.Builder(hours[i])
+                    .withEvent(null);
+            if (hours[i].isAvailable()) {
+                if (defaultEvent != null) {
+                    builder.withEvent(new Event(calendar.getSelectedDate(),
+                            i, defaultEvent.getName()));
+                }
+            }
+            hours[i] = builder.build();
+        }
+        for (Event e : listOfEvents) {
+            hours[e.getHour()] = new DayItemData.Builder(hours[e.getHour()])
+                    .withEvent(e)
+                    .build();
+            dayViewAdapter.notifyItemChanged(e.getHour());
+        }
+        dayViewAdapter.notifyDataSetChanged();
     }
 }

@@ -48,11 +48,13 @@ public class MakeAppointmentFragment extends Fragment {
         calendarFragment.addOnEventClickListener(event -> {
             System.out.println(event.getName());
         });
+        calendarFragment.setAvailability(8, 17);
+        calendarFragment.addDefaultDayEvent(new CalendarFragment.Event("Reserve slot"));
         calendarFragment.addEvents(new ArrayList<CalendarFragment.Event>() {{
-            add(new CalendarFragment.Event(CalendarDay.from(2022, 4, 16), 13, "ABC"));
-            add(new CalendarFragment.Event(CalendarDay.from(2022, 4, 16), 16, "DEF"));
+            add(new CalendarFragment.Event(CalendarDay.from(2022, 4, 16), 13, "ABC", false));
+            add(new CalendarFragment.Event(CalendarDay.from(2022, 4, 16), 16, "DEF", false));
             add(new CalendarFragment.Event(CalendarDay.from(2022, 4, 17),
-                    15, "ALSC"));
+                    15, "ALSC", false));
         }});
 
         String businessId = ((MakeAppointmentActivity) requireActivity()).getBusinessId();
