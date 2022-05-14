@@ -4,6 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.List;
 import java.util.Map;
 
 public class Business {
@@ -15,13 +16,15 @@ public class Business {
     private String phone;
     private LatLng location;
     private String address;
+    private List<String> appointments;
 
     public Business(String id) {
         this.id = id;
     }
 
     public Business(String id, String owner, String name, String email,
-                    String description, String phone, LatLng location, String address) {
+                    String description, String phone, LatLng location, String address,
+                    List<String> appointments) {
         this.id = id;
         this.owner = owner;
         this.name = name;
@@ -30,6 +33,7 @@ public class Business {
         this.phone = phone;
         this.location = location;
         this.address = address;
+        this.appointments = appointments;
     }
 
     public String getId() {
@@ -94,5 +98,28 @@ public class Business {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public List<String> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<String> appointments) {
+        this.appointments = appointments;
+    }
+
+    @Override
+    public String toString() {
+        return "Business{" +
+                "id='" + id + '\'' +
+                ", owner='" + owner + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", description='" + description + '\'' +
+                ", phone='" + phone + '\'' +
+                ", location=" + location +
+                ", address='" + address + '\'' +
+                ", appointments=" + appointments +
+                '}';
     }
 }

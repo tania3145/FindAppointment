@@ -2,11 +2,15 @@ package com.example.findappointment.services;
 
 import androidx.annotation.Nullable;
 
+import com.example.findappointment.data.Appointment;
 import com.example.findappointment.data.Business;
 import com.example.findappointment.data.User;
+import com.example.findappointment.ui.calendar.CalendarFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -16,8 +20,10 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +123,7 @@ public class Database {
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     User user = new User(task.getResult().getUser().getUid(),
-                            firstName, lastName, email, new ArrayList<>());
+                            firstName, lastName, email, new ArrayList<>(), new ArrayList<>());
 
                     db.collection("users")
                             .document(user.getId())
@@ -125,7 +131,8 @@ public class Database {
                                 put("first_name", user.getFirstName());
                                 put("last_name", user.getLastName());
                                 put("email", user.getEmail());
-                                put("businesses", new ArrayList<String>());
+                                put("businesses", user.getBusinesses());
+                                put("appointments", user.getAppointments());
                             }}).addOnCompleteListener(storeTask -> {
                         if (storeTask.isSuccessful()) {
                             auth.signInWithEmailAndPassword(email, password)
@@ -159,7 +166,7 @@ public class Database {
             return taskSource.getTask();
         }
         Business business = new Business(null, userId, name, email,
-                description, phone, location, address);
+                description, phone, location, address, new ArrayList<>());
         Map<String, Object> data = new HashMap<String, Object>() {{
             put("name", business.getName());
             put("owner", business.getOwner());
@@ -169,6 +176,7 @@ public class Database {
             put("location", new GeoPoint(business.getLocation().latitude,
                     business.getLocation().longitude));
             put("address", business.getAddress());
+            put("appointments", business.getAppointments());
         }};
         db.collection("businesses")
                 .add(data)
@@ -182,8 +190,13 @@ public class Database {
                                         .document(userSearch.getResult().getId())
                                         .update(new HashMap<String, Object>() {{
                                             put("businesses", businesses);
-                                        }});
-                                taskSource.setResult(business);
+                                        }}).addOnCompleteListener(userUpdate -> {
+                                    if (!userUpdate.isSuccessful()) {
+                                        taskSource.setException(userUpdate.getException());
+                                        return;
+                                    }
+                                    taskSource.setResult(business);
+                                });
                             } else {
                                 taskSource.setException(task.getException());
                             }
@@ -192,6 +205,71 @@ public class Database {
                         taskSource.setException(task.getException());
                     }
                 });
+        return taskSource.getTask();
+    }
+
+    public Task<Appointment> registerAppointment(String userId, String businessId,
+                                              CalendarDay day, int hour) {
+        TaskCompletionSource<Appointment> taskSource = new TaskCompletionSource<>();
+        if (userId == null || businessId == null) {
+            taskSource.setException(new IllegalArgumentException("Appointment is invalid."));
+            return taskSource.getTask();
+        }
+
+        Date d = new Date(day.getYear() - 1900, day.getMonth(), day.getDay(), hour, 0);
+        Timestamp time = new Timestamp(d);
+
+        Appointment appointment = new Appointment(null, userId, businessId, time);
+        Map<String, Object> data = new HashMap<String, Object>() {{
+            put("userId", appointment.getUserId());
+            put("businessId", appointment.getBusinessId());
+            put("time", appointment.getTime());
+        }};
+        db.collection("appointments")
+                .add(data)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        appointment.setId(task.getResult().getId());
+                        getUser(userId).addOnCompleteListener(userTask -> {
+                           if (!userTask.isSuccessful()) {
+                               taskSource.setException(userTask.getException());
+                               return;
+                           }
+                           getBusiness(businessId).addOnCompleteListener(businessTask -> {
+                               if (!businessTask.isSuccessful()) {
+                                   taskSource.setException(businessTask.getException());
+                                   return;
+                               }
+                               db.collection("users")
+                                   .document(userId)
+                                   .update(new HashMap<String, Object>() {{
+                                       userTask.getResult().getAppointments().add(task.getResult().getId());
+                                       put("appointments", userTask.getResult().getAppointments());
+                                   }}).addOnCompleteListener(userUpdate -> {
+                                   if (!userUpdate.isSuccessful()) {
+                                       taskSource.setException(userUpdate.getException());
+                                       return;
+                                   }
+                                   db.collection("businesses")
+                                           .document(businessId)
+                                           .update(new HashMap<String, Object>() {{
+                                               businessTask.getResult().getAppointments().add(task.getResult().getId());
+                                               put("appointments", businessTask.getResult().getAppointments());
+                                           }}).addOnCompleteListener(businessUpdate -> {
+                                       if (!businessUpdate.isSuccessful()) {
+                                           taskSource.setException(businessUpdate.getException());
+                                           return;
+                                       }
+                                       taskSource.setResult(appointment);
+                                   });
+                               });
+                           });
+                        });
+                    } else {
+                        taskSource.setException(task.getException());
+                    }
+                });
+
         return taskSource.getTask();
     }
 
@@ -208,6 +286,9 @@ public class Database {
         }
         if (snapshot.contains("businesses")) {
             user.setBusinesses((List<String>) snapshot.get("businesses"));
+        }
+        if (snapshot.contains("appointments")) {
+            user.setAppointments((List<String>) snapshot.get("appointments"));
         }
         return user;
     }
@@ -257,6 +338,9 @@ public class Database {
             LatLng location = new LatLng(point.getLatitude(), point.getLongitude());
             business.setLocation(location);
         }
+        if (snapshot.contains("appointments")) {
+            business.setAppointments((List<String>) snapshot.get("appointments"));
+        }
         return business;
     }
 
@@ -278,6 +362,67 @@ public class Database {
                         taskSource.setException(task.getException());
                     }
                 });
+        return taskSource.getTask();
+    }
+
+    private Appointment getAppointmentFromSnapshot(DocumentSnapshot snapshot) {
+        Appointment appointment = new Appointment(snapshot.getId());
+
+        if (snapshot.contains("userId")) {
+            appointment.setUserId(snapshot.getString("userId"));
+        }
+        if (snapshot.contains("businessId")) {
+            appointment.setBusinessId(snapshot.getString("businessId"));
+        }
+        if (snapshot.contains("time")) {
+            appointment.setTime(snapshot.getTimestamp("time"));
+        }
+        return appointment;
+    }
+
+    public Task<Appointment> getAppointment(String appointmentId) {
+        TaskCompletionSource<Appointment> taskSource = new TaskCompletionSource<>();
+        db.collection("appointments")
+                .document(appointmentId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot snapshot = task.getResult();
+                        if (!snapshot.exists()) {
+                            taskSource.setException(
+                                    new Exception("Could not find appointment details."));
+                            return;
+                        }
+                        taskSource.setResult(getAppointmentFromSnapshot(snapshot));
+                    } else {
+                        taskSource.setException(task.getException());
+                    }
+                });
+        return taskSource.getTask();
+    }
+
+    public Task<List<Appointment>> getAppointments(List<String> appointmentIds) {
+        TaskCompletionSource<List<Appointment>> taskSource = new TaskCompletionSource<>();
+        List<Appointment> res = new ArrayList<>();
+        List<Task<Appointment>> tasks = new ArrayList<>();
+        for (String appointmentId : appointmentIds) {
+            tasks.add(getAppointment(appointmentId));
+        }
+        Tasks.whenAllComplete(tasks)
+            .addOnCompleteListener(appointmentTasks -> {
+                if (!appointmentTasks.isSuccessful()) {
+                    taskSource.setException(appointmentTasks.getException());
+                    return;
+                }
+                for (Task<?> appointmentTask : appointmentTasks.getResult()) {
+                    if (!appointmentTask.isSuccessful()) {
+                        taskSource.setException(appointmentTask.getException());
+                        return;
+                    }
+                    res.add((Appointment) appointmentTask.getResult());
+                }
+                taskSource.setResult(res);
+            });
         return taskSource.getTask();
     }
 

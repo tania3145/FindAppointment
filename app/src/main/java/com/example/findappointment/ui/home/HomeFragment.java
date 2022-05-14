@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -201,9 +202,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
                 ((MainActivity) requireActivity()).goLogin();
                 return;
             }
-            Intent intent = new Intent(requireContext(), MakeAppointmentActivity.class);
-            intent.putExtra("businessId", data.getBusiness().getId());
-            makeAppointmentLauncher.launch(intent);
+            viewModel.getServices().getDatabase().getSignedInUser()
+                    .addOnSuccessListener(user -> {
+                Intent intent = new Intent(requireContext(), MakeAppointmentActivity.class);
+                intent.putExtra("userId", user.getId());
+                intent.putExtra("businessId", data.getBusiness().getId());
+                makeAppointmentLauncher.launch(intent);
+            });
         });
         Button viewBusiness = requireView().findViewById(R.id.view_button);
         viewBusiness.setOnClickListener(elView -> {

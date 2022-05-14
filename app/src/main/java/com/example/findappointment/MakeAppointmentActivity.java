@@ -11,6 +11,7 @@ import com.example.findappointment.databinding.ActivityRegisterBusinessBinding;
 
 public class MakeAppointmentActivity extends AppCompatActivity {
     private Services services;
+    private String userId;
     private String businessId;
 
     @Override
@@ -23,6 +24,7 @@ public class MakeAppointmentActivity extends AppCompatActivity {
         services = ((MainApplication) getApplication()).getServices();
 
         Intent intent = getIntent();
+        userId = intent.getStringExtra("userId");
         businessId = intent.getStringExtra("businessId");
     }
 
@@ -34,5 +36,10 @@ public class MakeAppointmentActivity extends AppCompatActivity {
     @NonNull
     public String getBusinessId() {
         return businessId;
+    }
+
+    @NonNull
+    public String getUserId() {
+        return userId;
     }
 }

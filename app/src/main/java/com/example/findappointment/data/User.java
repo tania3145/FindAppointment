@@ -9,18 +9,20 @@ public class User {
     private String lastName;
     private String email;
     private List<String> businesses;
+    private List<String> appointments;
 
     public User(String id) {
         this.id = id;
     }
 
     public User(String id, String firstName, String lastName, String email,
-                List<String> businesses) {
+                List<String> businesses, List<String> appointments) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.businesses = businesses;
+        this.appointments = appointments;
     }
 
     public String getId() {
@@ -63,6 +65,14 @@ public class User {
         this.businesses = businesses;
     }
 
+    public List<String> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<String> appointments) {
+        this.appointments = appointments;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -70,6 +80,8 @@ public class User {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
+                ", businesses=" + businesses +
+                ", appointments=" + appointments +
                 '}';
     }
 }
