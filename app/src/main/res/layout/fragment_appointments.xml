@@ -5,10 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".ui.appointments.AppointmentsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/calendar_fragment_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Appointments fragment" />
+        android:name="com.example.findappointment.ui.calendar.CalendarFragment"/>
 
 </FrameLayout>

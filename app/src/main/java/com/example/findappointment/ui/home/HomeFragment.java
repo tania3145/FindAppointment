@@ -131,7 +131,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
                             .position(business.getLocation())
                             .title(business.getName());
 
-                    if (!userId.get().isEmpty()) {
+                    if (!userId.get().isEmpty() && userId.get().equals(business.getOwner())) {
                         markerOptions.icon(BitmapDescriptorFactory
                                 .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                     }

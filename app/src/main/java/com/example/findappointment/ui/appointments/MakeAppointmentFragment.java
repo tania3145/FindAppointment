@@ -51,11 +51,13 @@ public class MakeAppointmentFragment extends Fragment {
         String userId = ((MakeAppointmentActivity) requireActivity()).getUserId();
         String businessId = ((MakeAppointmentActivity) requireActivity()).getBusinessId();
 
+        ProgressDialog pd = new ProgressDialog(requireActivity());
+        pd.setMessage("Loading ...");
+        pd.show();
+
         FragmentContainerView calendarContainer = view.findViewById(R.id.calendar_fragment_view);
         CalendarFragment calendarFragment = calendarContainer.getFragment();
         calendarFragment.addOnEventClickListener(event -> {
-            ProgressDialog pd = new ProgressDialog(requireActivity());
-            pd.setMessage("Loading ...");
             pd.show();
             services.getDatabase().registerAppointment(
                     userId, businessId, event.getDay(), event.getHour()
@@ -75,11 +77,11 @@ public class MakeAppointmentFragment extends Fragment {
         });
         calendarFragment.setAvailability(8, 17);
         calendarFragment.addDefaultDayEvent(new CalendarFragment.Event("Reserve slot"));
-        services.getDatabase().getBusiness(businessId).addOnCompleteListener(business -> {
-            services.getDatabase().getAppointments(business.getResult().getAppointments())
-                    .addOnCompleteListener(appointments -> {
+        services.getDatabase().getBusiness(businessId).addOnSuccessListener(business -> {
+            services.getDatabase().getAppointments(business.getAppointments())
+                    .addOnSuccessListener(appointments -> {
                         List<CalendarFragment.Event> events = new ArrayList<>();
-                        for (Appointment app : appointments.getResult()) {
+                        for (Appointment app : appointments) {
                             Date d = app.getTime().toDate();
                             CalendarDay day = CalendarDay.from(d);
                             int hour = d.getHours();
@@ -87,6 +89,7 @@ public class MakeAppointmentFragment extends Fragment {
                                     "Reserved", false));
                         }
                         calendarFragment.addEvents(events);
+                        pd.dismiss();
                     });
         });
     }
