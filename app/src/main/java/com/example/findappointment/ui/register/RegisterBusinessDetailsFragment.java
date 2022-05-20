@@ -219,11 +219,13 @@ public class RegisterBusinessDetailsFragment extends Fragment implements OnMapRe
                 }
             });
         });
-        nameField.setText("Restaurant");
-        emailField.setText("restaurant@gmail.com");
-        phoneField.setText("0735271827");
-        descriptionField.setText("Mancare buna. Veniti la noi <3 :*!!");
-        addressField.setText("Ardealului, Caransebes");
+
+        // todo
+       // nameField.setText("Restaurant");
+       // emailField.setText("restaurant@gmail.com");
+       // phoneField.setText("0735271827");
+       // descriptionField.setText("Mancare buna. Veniti la noi <3 :*!!");
+       // addressField.setText("Ardealului, Caransebes");
     }
 
     @Override

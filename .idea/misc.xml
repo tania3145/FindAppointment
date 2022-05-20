@@ -5,9 +5,14 @@
       <map>
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.583" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.5" />
+        <entry key="app/src/main/res/drawable/ic_menu_account.xml" value="0.2095" />
+        <entry key="app/src/main/res/drawable/ic_menu_calendar.xml" value="0.2095" />
         <entry key="app/src/main/res/drawable/ic_menu_camera.xml" value="0.583" />
+        <entry key="app/src/main/res/drawable/ic_menu_feedback.xml" value="0.2095" />
         <entry key="app/src/main/res/drawable/ic_menu_gallery.xml" value="0.583" />
         <entry key="app/src/main/res/drawable/ic_menu_home.xml" value="0.1645" />
+        <entry key="app/src/main/res/drawable/ic_menu_login.xml" value="0.2095" />
+        <entry key="app/src/main/res/drawable/ic_menu_register.xml" value="0.2095" />
         <entry key="app/src/main/res/drawable/ic_menu_slideshow.xml" value="0.583" />
         <entry key="app/src/main/res/drawable/side_nav_bar.xml" value="0.583" />
         <entry key="app/src/main/res/layout/activity_business_details.xml" value="0.30512820512820515" />
@@ -25,7 +30,7 @@
         <entry key="app/src/main/res/layout/fragment_business_details.xml" value="0.30512820512820515" />
         <entry key="app/src/main/res/layout/fragment_calendar.xml" value="0.30512820512820515" />
         <entry key="app/src/main/res/layout/fragment_calendar_day_item.xml" value="0.335" />
-        <entry key="app/src/main/res/layout/fragment_feedback.xml" value="0.29583333333333334" />
+        <entry key="app/src/main/res/layout/fragment_feedback.xml" value="0.19122257053291536" />
         <entry key="app/src/main/res/layout/fragment_gallery.xml" value="0.5911458333333334" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_item_list_dialog_list_dialog.xml" value="0.30512820512820515" />

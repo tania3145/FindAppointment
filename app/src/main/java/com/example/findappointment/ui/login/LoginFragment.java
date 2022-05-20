@@ -55,9 +55,9 @@ public class LoginFragment extends Fragment {
                 emailField.setError("Email is invalid");
             }
         });
-        // TODO: Remove
-        emailField.setText("tania.c@gmail.com");
-        passwordField.setText("abcdef");
+        // TODO
+       // emailField.setText("tania.c@gmail.com");
+       // passwordField.setText("abcdef");
         loginButton.setOnClickListener(parentView -> {
             String email = emailField.getText().toString();
             String password = passwordField.getText().toString();

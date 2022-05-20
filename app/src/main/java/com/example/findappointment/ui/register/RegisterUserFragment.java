@@ -135,11 +135,11 @@ public class RegisterUserFragment extends Fragment {
         });
 
         // TODO: Remove
-        firstNameField.setText("Tania");
-        lastNameField.setText("C");
-        emailField.setText("tania.c@gmail.com");
-        passwordField.setText("abcdef");
-        confirmPasswordField.setText("abcdef");
+       // firstNameField.setText("Tania");
+       // lastNameField.setText("C");
+       // emailField.setText("tania.c@gmail.com");
+       // passwordField.setText("abcdef");
+       // confirmPasswordField.setText("abcdef");
 
         Button registerButton = view.findViewById(R.id.register_button);
         registerButton.setOnClickListener(elView -> {
