@@ -1,2 +1,2 @@
-#Find Appointment
+# Find Appointment
 Developed an Android app called ”Find Appointment” in Java using Android Studio. The app allows users to schedule appointments for various services such as dentist, beauty salons, barber shops or car services and also every user can create their own business. Features include a dynamic map to view and book appointments, multiple service categories to choose from and dual roles (client and entrepreneur).
